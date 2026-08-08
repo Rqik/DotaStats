@@ -1,0 +1,338 @@
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-background);
+
+  &__route-fallback {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    color: var(--color-muted);
+  }
+}
+
+.app-main {
+  min-height: 100vh;
+  margin-left: var(--sidebar-width);
+}
+
+.page-wrap {
+  min-width: 0;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  &__mark {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-accent), transparent 55%);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--color-accent), transparent 88%);
+    color: var(--color-accent);
+  }
+
+  &__mark span {
+    width: 0.9rem;
+    border-top: 2px solid currentcolor;
+  }
+
+  &__title,
+  &__subtitle {
+    display: block;
+  }
+
+  &__title {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+  }
+
+  &__subtitle {
+    color: var(--color-muted);
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+.sidebar {
+  position: fixed;
+  z-index: 10;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: var(--sidebar-width);
+  flex-direction: column;
+  border-right: 1px solid var(--color-line);
+  background: var(--color-surface);
+  padding: 1.25rem;
+
+  &__header,
+  &__bank-heading,
+  &__profile,
+  &__link,
+  &__context {
+    display: flex;
+    align-items: center;
+  }
+
+  &__header {
+    justify-content: space-between;
+  }
+
+  &__close,
+  &__scrim {
+    display: none;
+  }
+
+  &__nav {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 2.75rem;
+  }
+
+  &__caption {
+    margin: 0 0 0.45rem 0.5rem;
+    color: var(--color-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__link {
+    gap: 0.75rem;
+    border-radius: 0.5rem;
+    color: var(--color-muted);
+    padding: 0.7rem 0.6rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+
+    &:hover,
+    &--active {
+      background: var(--color-surface-raised);
+      color: var(--color-text);
+    }
+  }
+
+  &__badge {
+    display: grid;
+    min-width: 1rem;
+    min-height: 1rem;
+    margin-left: auto;
+    place-items: center;
+    border: 1px solid var(--color-line);
+    border-radius: 0.25rem;
+    font-size: 0.6rem;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__bank {
+    border: 1px solid var(--color-line);
+    border-radius: 0.6rem;
+    padding: 0.8rem;
+  }
+
+  &__bank-heading {
+    justify-content: space-between;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__bank > strong {
+    display: block;
+    margin-top: 0.6rem;
+  }
+
+  &__bank small {
+    color: var(--color-muted);
+    font-size: 0.65rem;
+  }
+
+  &__bank b {
+    color: var(--color-positive);
+  }
+
+  &__progress {
+    height: 0.2rem;
+    margin: 0.7rem 0;
+    border-radius: 99px;
+    background: var(--color-line);
+  }
+
+  &__progress span {
+    display: block;
+    width: 57%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-positive);
+  }
+
+  &__profile {
+    gap: 0.6rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  &__profile > div:nth-child(2) {
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__profile strong,
+  &__profile span {
+    display: block;
+  }
+
+  &__profile span {
+    margin-top: 0.25rem;
+    color: var(--color-muted);
+    font-size: 0.65rem;
+  }
+
+  &__avatar {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #151515;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+}
+
+.topbar {
+  display: flex;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-background), transparent 8%);
+  padding: 0 2rem;
+
+  &__menu,
+  &__icon {
+    display: inline-grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border: 0;
+    border-radius: 0.4rem;
+    background: transparent;
+    color: var(--color-muted);
+  }
+
+  &__menu {
+    display: none;
+  }
+
+  &__context,
+  &__actions {
+    display: flex;
+    align-items: center;
+  }
+
+  &__context {
+    gap: 0.55rem;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__actions {
+    gap: 0.25rem;
+  }
+
+  &__live {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-positive);
+  }
+
+  &__divider {
+    height: 1rem;
+    border-left: 1px solid var(--color-line);
+  }
+
+  &__muted {
+    color: var(--color-muted);
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
+
+    &--open {
+      transform: translateX(0);
+    }
+
+    &__close {
+      display: inline-grid;
+    }
+
+    &__scrim {
+      position: fixed;
+      z-index: 9;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: rgb(0 0 0 / 55%);
+    }
+  }
+
+  .app-main {
+    margin-left: 0;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+
+    &__menu {
+      display: inline-grid;
+    }
+  }
+}
+
+@media (max-width: 620px) {
+  .page-wrap {
+    max-width: 100%;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .topbar__divider,
+  .topbar__muted,
+  .topbar__actions {
+    display: none;
+  }
+
+  .topbar {
+    justify-content: flex-start;
+    gap: 0.5rem;
+
+    &__context {
+      min-width: 0;
+      max-width: calc(100% - 2.75rem);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    &__status {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

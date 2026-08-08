@@ -1,0 +1,52 @@
+.page-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  &__eyebrow {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+  }
+
+  &__description {
+    max-width: 48rem;
+    margin: 0.5rem 0 0;
+    color: var(--color-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  @media (max-width: 620px) {
+    align-items: stretch;
+    flex-direction: column;
+
+    &__actions {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    &__actions > * {
+      width: 100%;
+      min-width: 0;
+      justify-content: center;
+      white-space: normal;
+    }
+  }
+}

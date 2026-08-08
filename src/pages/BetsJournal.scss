@@ -1,0 +1,13 @@
+.bets-journal {
+  &__primary, &__tools button { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 0.45rem; padding: 0.65rem 0.8rem; }
+  &__primary { border: 0; background: var(--color-accent); color: #151515; font-weight: 700; }
+  &__summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 0.75rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); }
+  &__summary article { padding: 1rem; } &__summary article + article { border-left: 1px solid var(--color-line); } &__summary span, &__summary strong { display: block; } &__summary span { color: var(--color-muted); font-size: 0.75rem; } &__summary strong { margin-top: 0.5rem; font-size: 1.3rem; }
+  &__panel { border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); padding: 1rem; }
+  &__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } &__filters, &__tools { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  &__filter, &__tools button { border: 1px solid var(--color-line); background: var(--color-background); color: var(--color-muted); } &__filter { border-radius: 0.35rem; padding: 0.45rem 0.6rem; } &__filter--active { border-color: var(--color-accent); color: var(--color-accent); }
+  &__table { overflow-x: auto; margin-top: 1rem; } &__table table { width: 100%; border-collapse: collapse; } &__table th, &__table td { border-bottom: 1px solid var(--color-line); padding: 0.7rem; text-align: left; white-space: nowrap; } &__table th { color: var(--color-muted); font-size: 0.7rem; } &__table td small { display: block; margin-top: 0.25rem; color: var(--color-muted); } &__table select { border: 1px solid var(--color-line); border-radius: 0.35rem; background: var(--color-background); color: var(--color-text); padding: 0.35rem; }
+  &__profit--positive { color: var(--color-positive); } &__profit--negative { color: var(--color-negative); } &__empty { color: var(--color-muted); text-align: center; }
+}
+
+@media (max-width: 620px) { .bets-journal__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bets-journal__summary article:nth-child(3) { border-left: 0; border-top: 1px solid var(--color-line); } .bets-journal__summary article:nth-child(4) { border-top: 1px solid var(--color-line); } .bets-journal__toolbar { align-items: start; flex-direction: column; } }

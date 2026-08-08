@@ -1,0 +1,47 @@
+.new-analysis {
+  &__modes,
+  &__teams,
+  &__fields,
+  &__workspace,
+  &__heroes {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  &__modes { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 1rem; }
+  &__workspace { grid-template-columns: minmax(0, 1fr) 18rem; align-items: start; }
+  &__teams, &__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  &__fields { grid-template-columns: 1.2fr 1fr 0.8fr; margin-top: 1rem; }
+  &__form, &__summary { min-width: 0; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); padding: 1.25rem; }
+  &__mode { display: grid; grid-template-columns: auto 1fr auto; gap: 0.65rem; align-items: center; border: 1px solid var(--color-line); border-radius: 0.6rem; background: var(--color-surface); color: var(--color-text); padding: 1rem; text-align: left; }
+  &__mode > span { min-width: 0; }
+  &__mode--active { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent), var(--color-surface) 93%); }
+  &__mode small, &__summary small, &__form > p { display: block; margin-top: 0.25rem; color: var(--color-muted); }
+  &__teams label, &__fields label, &__match-id { display: grid; gap: 0.4rem; color: var(--color-muted); font-size: 0.8rem; }
+  &__teams label span { position: relative; }
+  &__teams svg { position: absolute; top: 0.7rem; left: 0.7rem; color: var(--color-muted); }
+  &__teams input { padding-left: 2.2rem; }
+  &__form input, &__form select { width: 100%; border: 1px solid var(--color-line); border-radius: 0.45rem; outline: 0; background: var(--color-background); color: var(--color-text); padding: 0.7rem; }
+  &__fields label { position: relative; }
+  &__fields label svg { position: absolute; right: 0.65rem; bottom: 0.7rem; pointer-events: none; }
+  &__fields fieldset { display: grid; grid-template-columns: 2.25rem 2.25rem 1fr; gap: 0; margin: 0; border: 0; padding: 0; }
+  &__fields legend { margin-bottom: 0.4rem; color: var(--color-muted); font-size: 0.8rem; }
+  &__sign { border: 1px solid var(--color-line); background: var(--color-background); color: var(--color-muted); }
+  &__sign--active { background: var(--color-accent); color: #151515; }
+  &__sample { display: flex; gap: 0.4rem; margin-top: 1rem; }
+  &__sample-option, &__hero { border: 1px solid var(--color-line); border-radius: 0.4rem; background: var(--color-background); color: var(--color-muted); padding: 0.5rem 0.75rem; }
+  &__sample-option--active, &__hero--selected { border-color: var(--color-accent); color: var(--color-accent); }
+  &__heroes { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1rem; }
+  &__hero { min-height: 3rem; }
+  &__match-id { max-width: 30rem; margin-top: 1rem; }
+  &__error { color: var(--color-negative) !important; }
+  &__summary { position: sticky; top: 1rem; display: grid; gap: 0.75rem; }
+  &__summary > span, &__summary > small { color: var(--color-muted); font-size: 0.75rem; }
+  &__summary b { color: var(--color-accent); font-size: 1.2rem; }
+  &__submit { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; border: 0; border-radius: 0.45rem; background: var(--color-accent); color: #151515; padding: 0.75rem; font-weight: 700; }
+  &__submit:disabled { opacity: 0.65; cursor: wait; }
+}
+
+@media (max-width: 900px) { .new-analysis__workspace { grid-template-columns: 1fr; } }
+
+@media (max-width: 620px) { .new-analysis__modes, .new-analysis__teams, .new-analysis__fields { grid-template-columns: 1fr; } .new-analysis__heroes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
