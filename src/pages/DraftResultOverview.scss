@@ -1,0 +1,150 @@
+.draft-result-overview {
+  &__metrics,
+  &__teams,
+  &__ranges > div {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  &__metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &__metrics article,
+  &__team,
+  &__formula,
+  &__ranges {
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background: var(--color-surface);
+    padding: 1rem;
+  }
+
+  &__metrics span,
+  &__metrics small,
+  &__team > span,
+  &__formula p,
+  &__ranges span,
+  &__ranges p {
+    color: var(--color-muted);
+  }
+
+  &__metrics strong,
+  &__metrics small {
+    display: block;
+  }
+
+  &__metrics strong {
+    margin-top: 0.55rem;
+    overflow-wrap: anywhere;
+    font-size: 1.15rem;
+  }
+
+  &__metrics small {
+    margin-top: 0.25rem;
+  }
+
+  &__teams {
+    grid-template-columns: 1fr 1fr;
+    margin-top: 0.75rem;
+  }
+
+  &__team--a {
+    border-color: color-mix(in srgb, #56c8ff, transparent 55%);
+  }
+
+  &__team--b {
+    border-color: color-mix(in srgb, #ff9d52, transparent 55%);
+  }
+
+  &__team h2,
+  &__formula h2,
+  &__ranges h2,
+  &__ranges p {
+    margin: 0.35rem 0 0;
+  }
+
+  &__team ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__team li {
+    border: 1px solid var(--color-line);
+    border-radius: 99px;
+    padding: 0.35rem 0.55rem;
+  }
+
+  &__formula,
+  &__ranges {
+    margin-top: 0.75rem;
+  }
+
+  &__formula dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin: 1rem 0 0;
+  }
+
+  &__formula dl div {
+    border-top: 1px solid var(--color-line);
+    padding-top: 0.65rem;
+  }
+
+  &__formula dt,
+  &__formula dd {
+    margin: 0;
+  }
+
+  &__formula dt {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__formula dd {
+    margin-top: 0.25rem;
+  }
+
+  &__ranges > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 0.8rem;
+  }
+
+  &__ranges article {
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+    padding: 0.8rem;
+  }
+
+  &__ranges strong {
+    display: block;
+    margin-top: 0.35rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .draft-result-overview {
+    &__metrics {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    &__ranges > div {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 620px) {
+  .draft-result-overview {
+    &__metrics,
+    &__teams,
+    &__formula dl {
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -1,0 +1,110 @@
+.team-picker {
+  display: grid;
+  gap: 0.8rem;
+
+  &__field {
+    display: grid;
+    min-width: 0;
+    gap: 0.35rem;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+  }
+
+  &__combobox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+    background: var(--color-background);
+    color: var(--color-muted);
+    padding: 0 0.65rem;
+  }
+
+  &__combobox:focus-within {
+    border-color: var(--color-accent);
+  }
+
+  &__combobox input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text);
+    padding: 0.7rem 0.55rem;
+  }
+
+  &__combobox input:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  &__options {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 0.3rem);
+    right: 0;
+    left: 0;
+    display: grid;
+    max-height: 17rem;
+    overflow-y: auto;
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+    background: var(--color-surface-raised);
+    box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 35%);
+    padding: 0.3rem;
+  }
+
+  &__option {
+    display: grid;
+    gap: 0.18rem;
+    border: 0;
+    border-radius: 0.3rem;
+    background: transparent;
+    color: var(--color-text);
+    padding: 0.55rem;
+    text-align: left;
+  }
+
+  &__option small {
+    color: var(--color-muted);
+  }
+
+  &__option--active,
+  &__option[aria-selected='true'] {
+    background: color-mix(in srgb, var(--color-accent), transparent 86%);
+  }
+
+  &__teams {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__status {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__status--error {
+    color: var(--color-negative);
+  }
+
+  &__retry {
+    justify-self: start;
+    border: 1px solid var(--color-line);
+    border-radius: 0.4rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.5rem 0.65rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .team-picker__teams {
+    grid-template-columns: 1fr;
+  }
+}

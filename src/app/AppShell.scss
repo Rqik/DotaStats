@@ -72,8 +72,6 @@
   padding: 1.25rem;
 
   &__header,
-  &__bank-heading,
-  &__profile,
   &__link,
   &__context {
     display: flex;
@@ -134,80 +132,25 @@
     flex: 1;
   }
 
-  &__bank {
+  &__local {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
     border: 1px solid var(--color-line);
     border-radius: 0.6rem;
     padding: 0.8rem;
-  }
-
-  &__bank-heading {
-    justify-content: space-between;
     color: var(--color-muted);
     font-size: 0.75rem;
   }
 
-  &__bank > strong {
-    display: block;
-    margin-top: 0.6rem;
-  }
-
-  &__bank small {
-    color: var(--color-muted);
-    font-size: 0.65rem;
-  }
-
-  &__bank b {
-    color: var(--color-positive);
-  }
-
-  &__progress {
-    height: 0.2rem;
-    margin: 0.7rem 0;
-    border-radius: 99px;
-    background: var(--color-line);
-  }
-
-  &__progress span {
-    display: block;
-    width: 57%;
-    height: 100%;
-    border-radius: inherit;
-    background: var(--color-positive);
-  }
-
-  &__profile {
-    gap: 0.6rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--color-line);
-  }
-
-  &__profile > div:nth-child(2) {
-    min-width: 0;
-    flex: 1;
-  }
-
-  &__profile strong,
-  &__profile span {
+  &__local span,
+  &__local strong,
+  &__local small {
     display: block;
   }
 
-  &__profile span {
-    margin-top: 0.25rem;
-    color: var(--color-muted);
-    font-size: 0.65rem;
-  }
-
-  &__avatar {
-    display: grid;
-    width: 2rem;
-    height: 2rem;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--color-accent);
-    color: #151515;
-    font-size: 0.75rem;
-    font-weight: 800;
+  &__local small {
+    margin-top: 0.2rem;
   }
 }
 
@@ -271,10 +214,14 @@
 
 @media (max-width: 900px) {
   .sidebar {
+    visibility: hidden;
+    pointer-events: none;
     transform: translateX(-100%);
     transition: transform 180ms ease;
 
     &--open {
+      visibility: visible;
+      pointer-events: auto;
       transform: translateX(0);
     }
 
@@ -314,8 +261,7 @@
   }
 
   .topbar__divider,
-  .topbar__muted,
-  .topbar__actions {
+  .topbar__muted {
     display: none;
   }
 
@@ -325,7 +271,7 @@
 
     &__context {
       min-width: 0;
-      max-width: calc(100% - 2.75rem);
+      max-width: calc(100% - 5.25rem);
       overflow: hidden;
       white-space: nowrap;
     }
@@ -333,6 +279,11 @@
     &__status {
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    &__actions {
+      display: flex;
+      margin-left: auto;
     }
   }
 }

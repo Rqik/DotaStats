@@ -1,0 +1,139 @@
+.draft-form {
+  min-width: 0;
+
+  &__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__heading h2,
+  &__heading p {
+    margin: 0;
+  }
+
+  &__heading p,
+  &__source {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__heading p { margin-top: 0.35rem; }
+
+  &__source {
+    max-width: 17rem;
+    text-align: right;
+  }
+
+  &__source--error { color: var(--color-negative); }
+
+  &__retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.4rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.55rem 0.7rem;
+  }
+
+  &__teams {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  &__real-teams {
+    margin-top: 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+  }
+
+  &__real-teams summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  &__real-teams > p {
+    color: var(--color-muted);
+  }
+
+  &__team {
+    display: grid;
+    min-width: 0;
+    gap: 0.75rem;
+    border-top: 2px solid var(--color-team-a);
+    border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--color-team-a), transparent 96%);
+    padding: 0.8rem;
+  }
+
+  &__team--b {
+    border-top-color: var(--color-team-b);
+    background: color-mix(in srgb, var(--color-team-b), transparent 96%);
+  }
+
+  &__team > label,
+  &__market label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__team > label small { font-size: 0.68rem; }
+
+  &__team input,
+  &__team select,
+  &__market input,
+  &__market select {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 0.4rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.65rem;
+  }
+
+  &__market {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 1rem 0 0;
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+  }
+
+  &__market-note {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__market legend {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .draft-form {
+    &__teams { grid-template-columns: 1fr; }
+    &__market { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+}
+
+@media (max-width: 620px) {
+  .draft-form {
+    &__heading { flex-direction: column; }
+    &__source { max-width: none; text-align: left; }
+    &__market { grid-template-columns: 1fr; }
+  }
+}

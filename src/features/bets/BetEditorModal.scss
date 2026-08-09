@@ -1,0 +1,131 @@
+.bet-editor {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgb(0 0 0 / 70%);
+  padding: 1rem;
+
+  &__dialog {
+    width: min(100%, 36rem);
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    box-shadow: 0 1rem 4rem rgb(0 0 0 / 45%);
+    padding: 1.2rem;
+  }
+
+  &__header,
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__header span {
+    color: var(--color-accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__header h2 {
+    margin: 0.25rem 0 0;
+  }
+
+  &__header button {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--color-line);
+    border-radius: 0.4rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.45rem;
+  }
+
+  &__form {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  &__form label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+  }
+
+  &__form input,
+  &__form select {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 0.4rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.65rem;
+  }
+
+  &__form input[aria-invalid='true'] {
+    border-color: var(--color-negative);
+  }
+
+  &__form label small {
+    color: var(--color-negative);
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__note {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__actions {
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1rem;
+  }
+
+  &__actions button {
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.65rem 0.85rem;
+  }
+
+  &__actions &__save {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #151515;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 620px) {
+  .bet-editor {
+    align-items: end;
+    padding: 0;
+  }
+
+  .bet-editor__dialog {
+    max-height: calc(100dvh - 0.5rem);
+    overflow-y: auto;
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+
+  .bet-editor__row {
+    grid-template-columns: 1fr;
+  }
+}

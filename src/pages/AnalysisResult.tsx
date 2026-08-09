@@ -1,27 +1,180 @@
-import { ArrowLeft, Check, CheckCircle2, Download, Info, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, CheckCircle2, Download, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeading } from '../components/PageHeading';
+import { AnalysisPersistenceNotice } from '../components/AnalysisPersistenceNotice';
 import { useBetStore } from '../features/bets/betStore';
-import { calculateDemoHandicapResult, demoHandicapInput, useAnalysisStore } from '../stores/analysis';
-import { ProbabilityChart } from './ProbabilityChart';
+import { downloadJsonFile } from '../features/data-transfer/dataTransfer';
+import { useAnalysisStore } from '../stores/analysis';
+import { HandicapMatchesTable } from './HandicapMatchesTable';
+import { HandicapResultOverview } from './HandicapResultOverview';
 import './AnalysisResult.scss';
 
-const statusLabels = { insufficient_data: 'Недостаточно данных', no_edge: 'Преимущества нет', borderline: 'Пограничная ситуация', statistical_edge: 'Есть статистический запас' };
-const matches = [{ id: '8420184011', date: '14.07.26', opponent: 'Xtreme Gaming', score: '18 : 31', covered: true }, { id: '8417290448', date: '12.07.26', opponent: 'Yakult Brothers', score: '21 : 39', covered: true }, { id: '8414062231', date: '10.07.26', opponent: 'Team Tidebound', score: '14 : 38', covered: false }, { id: '8411057190', date: '08.07.26', opponent: 'Azure Ray', score: '27 : 35', covered: true }];
+function resultSource(
+  sources: readonly ('network' | 'cache' | 'stale-cache')[],
+): 'real' | 'cache' | 'stale' {
+  if (sources.includes('stale-cache')) return 'stale';
+  if (sources.every((source) => source === 'cache')) return 'cache';
+  return 'real';
+}
+
+function sourceDescription(source: 'real' | 'cache' | 'stale', savedAt: number): string {
+  const ageMinutes = Math.max(0, Math.floor((Date.now() - savedAt) / 60_000));
+  if (source === 'stale') return `устаревший кэш · возраст ${ageMinutes} мин.`;
+  if (source === 'cache') return `кэш · возраст ${ageMinutes} мин.`;
+  return 'реальные данные OpenDota';
+}
 
 export default function AnalysisResult() {
   const navigate = useNavigate();
-  const addBet = useBetStore((state) => state.addBet);
+  const createBet = useBetStore((state) => state.createBet);
   const bets = useBetStore((state) => state.bets);
-  const storedInput = useAnalysisStore((state) => state.handicapInput);
-  const storedResult = useAnalysisStore((state) => state.handicapResult);
-  const input = storedInput ?? demoHandicapInput;
-  const result = storedResult ?? calculateDemoHandicapResult(input);
-  const sign = input.sign === 'plus' ? '+' : '−';
-  const opponent = input.selectedTeam === input.teamA ? input.teamB : input.teamA;
-  const [saved, setSaved] = useState(bets.some(({ id }) => id === 'analysis-bet-handicap'));
-  const saveBet = () => { addBet({ id: 'analysis-bet-handicap', date: '19 июл., 14:20', tournament: 'Elite League', match: `${input.teamA} — ${input.teamB}`, selection: `${input.selectedTeam} ${sign}${input.handicap} убийств`, odds: input.odds, stake: 1000, result: 'pending', profit: 0 }); setSaved(true); };
+  const analysis = useAnalysisStore((state) => state.handicap);
+  const persistence = useAnalysisStore((state) => state.persistence.handicap);
+  const retryPersistence = useAnalysisStore((state) => state.retryPersistence);
 
-  return <div className="analysis-result"><button className="analysis-result__back" type="button" onClick={() => navigate('/analysis')}><ArrowLeft size={16} />Новый анализ</button><PageHeading eyebrow="Фора по убийствам · расчёт завершён" title={`${input.teamA} — ${input.teamB}`} description={`Elite League · выборка ${input.sample} карт`} actions={<><button className="analysis-result__secondary" type="button"><Download size={16} />Экспорт</button><button className="analysis-result__primary" type="button" onClick={saveBet}>{saved ? <CheckCircle2 size={16} /> : <Plus size={16} />}{saved ? 'В журнале' : 'Сохранить ставку'}</button></>} /><section className="analysis-result__hero"><article className="analysis-result__selection"><span>Анализируемый исход</span><h2>{input.selectedTeam} <b>{sign}{input.handicap}</b></h2><dl><div><dt>Коэффициент</dt><dd>{input.odds.toFixed(2)}</dd></div><div><dt>Безубыточность</dt><dd>{(result.breakeven * 100).toFixed(1)}%</dd></div></dl><p><CheckCircle2 size={19} /><span><strong>{statusLabels[result.status]}</strong>Расчёт выше порога безубыточности на {Math.abs(result.edge * 100).toFixed(1)} п.п.</span></p></article><article className="analysis-result__probability"><ProbabilityChart probability={result.probability} /></article><article className="analysis-result__edge"><span>{statusLabels[result.status]}</span><strong>{result.edge >= 0 ? '+' : ''}{(result.edge * 100).toFixed(1)} <small>п.п.</small></strong><div><i /><b /></div><p><Info size={15} />Это разница с вероятностью безубыточности, не гарантия исхода.</p></article></section><section className="analysis-result__coverage"><article><span>{input.selectedTeam}</span><strong>{(result.teamFrequency * 100).toFixed(1)}%</strong><small>Сглаженная частота, 17 из 20</small></article><article><span>Против {opponent}</span><strong>{(result.opponentFrequency * 100).toFixed(1)}%</strong><small>Сглаженная частота, 14 из 20</small></article><article><span>Личные встречи</span><strong>{(result.h2hFrequency * 100).toFixed(1)}%</strong><small>Вес в итоговом расчёте: 20%</small></article></section><section className="analysis-result__panel"><h2>Как получили {(result.probability * 100).toFixed(1)}%</h2><div className="analysis-result__formula"><span>{input.selectedTeam}<b>{(result.teamFrequency * 100).toFixed(1)}%</b></span><i>+</i><span>{opponent}<b>{(result.opponentFrequency * 100).toFixed(1)}%</b></span><i>+</i><span>H2H<b>{(result.h2hFrequency * 100).toFixed(1)}%</b></span><i>=</i><strong>{(result.probability * 100).toFixed(1)}%</strong></div></section><section className="analysis-result__panel"><h2>Использованные матчи</h2><div className="analysis-result__table"><table><thead><tr><th>Дата</th><th>Соперник</th><th>Счёт</th><th>Фора {sign}{input.handicap}</th><th>Match ID</th></tr></thead><tbody>{matches.map((match) => <tr key={match.id}><td>{match.date}</td><td>{match.opponent}</td><td>{match.score}</td><td><span className={match.covered ? 'analysis-result__status analysis-result__status--covered' : 'analysis-result__status analysis-result__status--missed'}>{match.covered ? <Check size={13} /> : null}{match.covered ? 'Прошла' : 'Не прошла'}</span></td><td>#{match.id}</td></tr>)}</tbody></table></div></section></div>;
+  if (analysis.status === 'idle') {
+    return (
+      <div className="analysis-result">
+        <PageHeading
+          eyebrow="Фора по убийствам"
+          title="Нет результата анализа"
+          description="Сначала выберите турнир, две команды и загрузите реальные матчи OpenDota."
+        />
+        <section className="analysis-result__empty">
+          <p>Демонстрационная выборка не подставляется вместо отсутствующих данных.</p>
+          <button type="button" onClick={() => navigate('/analysis')}>Перейти к анализу</button>
+        </section>
+      </div>
+    );
+  }
+
+  if (analysis.status === 'loading') {
+    return (
+      <div className="analysis-result">
+        <PageHeading title="Загружаем матчи OpenDota…" />
+        <p className="analysis-result__state" role="status">
+          Собираем независимые выборки команд и личные встречи.
+        </p>
+      </div>
+    );
+  }
+
+  if (analysis.status === 'error') {
+    return (
+      <div className="analysis-result">
+        <PageHeading title="Анализ не выполнен" description={analysis.message} />
+        <section className="analysis-result__empty" role="alert">
+          <p>Результат не был рассчитан и выдуманные значения не показаны.</p>
+          <button type="button" onClick={() => navigate('/analysis')}>Проверить запрос</button>
+        </section>
+      </div>
+    );
+  }
+
+  const { input, result } = analysis;
+  const sign = input.sign === 'plus' ? '+' : '−';
+  const match = `${input.teamA} — ${input.teamB}`;
+  const selection = `${input.selectedTeam} ${sign}${input.handicap} убийств`;
+  const saved = bets.some((bet) => bet.match === match && bet.selection === selection);
+  const sources = [
+    result.selectedSample.source,
+    result.opponentSample.source,
+    result.h2hSample.source,
+  ];
+  const source = resultSource(sources);
+
+  const saveBet = () => {
+    if (saved) return;
+    void createBet({
+      date: new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date()),
+      tournament: input.leagueName,
+      match,
+      selection,
+      odds: input.odds,
+      stake: 1000,
+      stakeType: 'cash',
+      result: 'pending',
+    });
+  };
+
+  const exportResult = () => downloadJsonFile('dota-pulse-analysis-result.json', {
+    format: 'dota-pulse-analysis-result',
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    source: {
+      kind: source,
+      savedAt: new Date(result.savedAt).toISOString(),
+      samples: {
+        selectedTeam: result.selectedSample.source,
+        opponent: result.opponentSample.source,
+        headToHead: result.h2hSample.source,
+      },
+    },
+    input,
+    formula: {
+      weights: result.weights,
+      smoothing: '(wins + 1) / (matches + 2)',
+      breakeven: '1 / odds',
+      edge: 'probability - breakeven',
+    },
+    samples: {
+      selectedTeam: result.selectedSample,
+      opponent: result.opponentSample,
+      headToHead: result.h2hSample,
+    },
+    result,
+    usedMatches: result.usedMatches,
+    disclaimer: 'Статистический расчёт не гарантирует исход и не является рекомендацией сделать ставку.',
+  });
+
+  return (
+    <div className="analysis-result">
+      <button
+        className="analysis-result__back"
+        type="button"
+        onClick={() => navigate('/analysis')}
+      >
+        <ArrowLeft size={16} />
+        Новый анализ
+      </button>
+      <PageHeading
+        eyebrow="Фора по убийствам · реальные данные"
+        title={`${input.teamA} — ${input.teamB}`}
+        description={`${input.leagueName} · ${sourceDescription(source, result.savedAt)} · ${result.usedMatches.length} уникальных матчей`}
+        actions={(
+          <>
+            <button className="analysis-result__secondary" type="button" onClick={exportResult}>
+              <Download size={16} />
+              Экспорт
+            </button>
+            <button
+              className="analysis-result__primary"
+              type="button"
+              onClick={saveBet}
+              disabled={saved}
+            >
+              {saved ? <CheckCircle2 size={16} /> : <Plus size={16} />}
+              {saved ? 'В журнале' : 'Сохранить ставку'}
+            </button>
+          </>
+        )}
+      />
+      <AnalysisPersistenceNotice state={persistence} onRetry={() => void retryPersistence('handicap')} />
+      <HandicapResultOverview input={input} result={result} />
+      {result.warnings.length > 0 ? (
+        <section className="analysis-result__warnings" aria-labelledby="analysis-warnings-title">
+          <h2 id="analysis-warnings-title">Ограничения данных</h2>
+          <ul>{result.warnings.map((warning) => (
+            <li key={`${warning.code}-${warning.count ?? 0}`}>{warning.message}</li>
+          ))}</ul>
+        </section>
+      ) : null}
+      <HandicapMatchesTable matches={result.usedMatches} sign={sign} line={result.line} />
+    </div>
+  );
 }

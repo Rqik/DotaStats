@@ -1,0 +1,89 @@
+.handicap-matches {
+  min-width: 0;
+  margin-top: 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.65rem;
+  background: var(--color-surface);
+  padding: 1.2rem;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 { font-size: 1.1rem; }
+
+  p {
+    margin-top: 0.45rem;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+  }
+
+  &__scroller {
+    max-width: 100%;
+    overflow-x: auto;
+    margin-top: 1rem;
+    outline-offset: 0.2rem;
+  }
+
+  table {
+    width: 100%;
+    min-width: 48rem;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border-bottom: 1px solid var(--color-line);
+    padding: 0.75rem;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  thead th {
+    color: var(--color-muted);
+    font-size: 0.7rem;
+  }
+
+  td strong,
+  td small {
+    display: block;
+  }
+
+  td small {
+    margin-top: 0.15rem;
+    color: var(--color-muted);
+  }
+
+  &__group th {
+    background: color-mix(in srgb, var(--color-accent), transparent 94%);
+    color: var(--color-accent);
+    font-size: 0.75rem;
+  }
+
+  &__status {
+    display: inline-flex;
+    border-radius: 0.25rem;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.7rem;
+  }
+
+  &__status--win {
+    background: color-mix(in srgb, var(--color-positive), transparent 85%);
+    color: var(--color-positive);
+  }
+
+  &__status--loss {
+    background: color-mix(in srgb, var(--color-negative), transparent 85%);
+    color: var(--color-negative);
+  }
+
+  &__status--refund {
+    background: color-mix(in srgb, var(--color-warning), transparent 85%);
+    color: var(--color-warning);
+  }
+}
+
+@media (max-width: 620px) {
+  .handicap-matches { padding: 0.9rem; }
+}

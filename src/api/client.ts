@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-export type ApiErrorKind = 'network' | 'http' | 'not_found' | 'rate_limit' | 'invalid_schema' | 'timeout';
+export type ApiErrorKind = 'network' | 'http' | 'not_found' | 'rate_limit' | 'invalid_request' | 'invalid_schema' | 'timeout';
 
 export class ApiError extends Error {
   readonly kind: ApiErrorKind;
@@ -59,7 +59,7 @@ export class OpenDotaClient {
   constructor(options: OpenDotaClientOptions = {}) {
     this.apiKey = options.apiKey;
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '');
-    this.fetchFn = options.fetchFn ?? fetch;
+    this.fetchFn = options.fetchFn ?? globalThis.fetch.bind(globalThis);
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.maxRetries = options.maxRetries ?? DEFAULT_MAX_RETRIES;
     this.sleep = options.sleep ?? defaultSleep;

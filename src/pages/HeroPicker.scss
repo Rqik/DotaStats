@@ -1,0 +1,105 @@
+.hero-picker {
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 0.55rem;
+  background: var(--color-background);
+  padding: 0.85rem;
+
+  &__header,
+  &__selected,
+  &__chip,
+  &__search {
+    display: flex;
+    align-items: center;
+  }
+
+  &__header {
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__header span,
+  &__selected small,
+  &__hint,
+  &__results small,
+  &__results p {
+    color: var(--color-muted);
+    font-size: 0.72rem;
+  }
+
+  &__selected {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    min-height: 3.2rem;
+    margin-top: 0.65rem;
+  }
+
+  &__chip {
+    gap: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-accent), transparent 55%);
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--color-accent), transparent 92%);
+    padding: 0.3rem 0.35rem 0.3rem 0.55rem;
+    font-size: 0.72rem;
+  }
+
+  &__chip button {
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-muted);
+    padding: 0.1rem;
+  }
+
+  &__search {
+    position: relative;
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    color: var(--color-muted);
+    font-size: 0.72rem;
+  }
+
+  &__search svg {
+    position: absolute;
+    bottom: 0.7rem;
+    left: 0.65rem;
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  &__search input {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 0.4rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    padding: 0.65rem 0.65rem 0.65rem 2rem;
+  }
+
+  &__results {
+    display: grid;
+    max-height: 16rem;
+    overflow-y: auto;
+    margin-top: 0.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+  }
+
+  &__results button {
+    display: grid;
+    gap: 0.2rem;
+    border: 0;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-text);
+    padding: 0.6rem;
+    text-align: left;
+  }
+
+  &__results button:last-child { border-bottom: 0; }
+  &__results p { margin: 0; padding: 0.75rem; }
+  &__hint { margin: 0.55rem 0 0; }
+}

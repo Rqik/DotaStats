@@ -1,0 +1,108 @@
+.help-dialog {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgb(0 0 0 / 72%);
+  padding: 1rem;
+
+  &__dialog {
+    width: min(100%, 40rem);
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    box-shadow: 0 1rem 4rem rgb(0 0 0 / 45%);
+    padding: 1.2rem;
+  }
+
+  &__header,
+  &__footer,
+  &__content article {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__header {
+    justify-content: space-between;
+  }
+
+  &__header span {
+    color: var(--color-accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__header h2,
+  &__content h3,
+  &__content p {
+    margin: 0;
+  }
+
+  &__header h2 { margin-top: 0.25rem; }
+
+  &__header button,
+  &__footer button {
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.6rem 0.75rem;
+  }
+
+  &__content {
+    display: grid;
+    gap: 0.65rem;
+    margin: 1rem 0;
+  }
+
+  &__content article {
+    align-items: flex-start;
+    border: 1px solid var(--color-line);
+    border-radius: 0.55rem;
+    padding: 0.85rem;
+  }
+
+  &__content article > svg {
+    flex: 0 0 auto;
+    color: var(--color-accent);
+  }
+
+  &__content h3 { font-size: 0.95rem; }
+
+  &__content p {
+    margin-top: 0.35rem;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+  }
+
+  &__footer {
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1rem;
+  }
+
+  &__footer button {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #151515;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 620px) {
+  .help-dialog {
+    align-items: end;
+    padding: 0;
+  }
+
+  .help-dialog__dialog {
+    max-height: calc(100dvh - 0.5rem);
+    overflow-y: auto;
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+}

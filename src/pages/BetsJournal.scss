@@ -1,13 +1,351 @@
 .bets-journal {
-  &__primary, &__tools button { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 0.45rem; padding: 0.65rem 0.8rem; }
-  &__primary { border: 0; background: var(--color-accent); color: #151515; font-weight: 700; }
-  &__summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 0.75rem; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); }
-  &__summary article { padding: 1rem; } &__summary article + article { border-left: 1px solid var(--color-line); } &__summary span, &__summary strong { display: block; } &__summary span { color: var(--color-muted); font-size: 0.75rem; } &__summary strong { margin-top: 0.5rem; font-size: 1.3rem; }
-  &__panel { border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); padding: 1rem; }
-  &__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } &__filters, &__tools { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-  &__filter, &__tools button { border: 1px solid var(--color-line); background: var(--color-background); color: var(--color-muted); } &__filter { border-radius: 0.35rem; padding: 0.45rem 0.6rem; } &__filter--active { border-color: var(--color-accent); color: var(--color-accent); }
-  &__table { overflow-x: auto; margin-top: 1rem; } &__table table { width: 100%; border-collapse: collapse; } &__table th, &__table td { border-bottom: 1px solid var(--color-line); padding: 0.7rem; text-align: left; white-space: nowrap; } &__table th { color: var(--color-muted); font-size: 0.7rem; } &__table td small { display: block; margin-top: 0.25rem; color: var(--color-muted); } &__table select { border: 1px solid var(--color-line); border-radius: 0.35rem; background: var(--color-background); color: var(--color-text); padding: 0.35rem; }
-  &__profit--positive { color: var(--color-positive); } &__profit--negative { color: var(--color-negative); } &__empty { color: var(--color-muted); text-align: center; }
+  min-width: 0;
+
+  &__primary,
+  &__tools button,
+  &__row-actions button,
+  &__storage-state button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-radius: 0.45rem;
+    padding: 0.65rem 0.8rem;
+  }
+
+  &__primary {
+    border: 0;
+    background: var(--color-accent);
+    color: #151515;
+    font-weight: 700;
+  }
+
+  &__primary:disabled,
+  &__tools button:disabled,
+  &__row-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &__storage-state {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background: var(--color-surface);
+    padding: 1rem;
+  }
+
+  &__storage-state > div {
+    min-width: 0;
+  }
+
+  &__storage-state strong,
+  &__storage-state p {
+    display: block;
+    margin: 0;
+  }
+
+  &__storage-state p {
+    margin-top: 0.3rem;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+  }
+
+  &__storage-state button {
+    flex: 0 0 auto;
+    border: 1px solid var(--color-line);
+    background: var(--color-background);
+    color: var(--color-text);
+  }
+
+  &__storage-state--error {
+    border-color: color-mix(in srgb, var(--color-negative), transparent 45%);
+  }
+
+  &__storage-state--error strong {
+    color: var(--color-negative);
+  }
+
+  &__spinner {
+    flex: 0 0 auto;
+    animation: bets-journal-spin 0.9s linear infinite;
+    color: var(--color-accent);
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background: var(--color-surface);
+  }
+
+  &__summary article {
+    padding: 1rem;
+  }
+
+  &__summary article + article {
+    border-left: 1px solid var(--color-line);
+  }
+
+  &__summary span,
+  &__summary strong {
+    display: block;
+  }
+
+  &__summary span {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__summary strong {
+    margin-top: 0.5rem;
+    font-size: 1.3rem;
+  }
+
+  &__panel {
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background: var(--color-surface);
+    padding: 1rem;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__filters,
+  &__tools,
+  &__row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  &__filter,
+  &__tools button,
+  &__row-actions button {
+    border: 1px solid var(--color-line);
+    background: var(--color-background);
+    color: var(--color-muted);
+  }
+
+  &__filter {
+    border-radius: 0.35rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  &__filter--active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  &__file-input,
+  &__visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  &__message {
+    margin: 0.75rem 0 0;
+    color: var(--color-positive);
+    font-size: 0.8rem;
+  }
+
+  &__message--error {
+    color: var(--color-negative);
+  }
+
+  &__table {
+    overflow-x: auto;
+    margin-top: 1rem;
+  }
+
+  &__table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  &__table th,
+  &__table td {
+    border-bottom: 1px solid var(--color-line);
+    padding: 0.7rem;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  &__table th {
+    color: var(--color-muted);
+    font-size: 0.7rem;
+  }
+
+  &__table td small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--color-muted);
+  }
+
+  &__table select {
+    border: 1px solid var(--color-line);
+    border-radius: 0.35rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.35rem;
+  }
+
+  &__row-actions button {
+    padding: 0.42rem;
+  }
+
+  &__action-label {
+    display: none;
+  }
+
+  &__row-actions &__delete {
+    color: var(--color-negative);
+  }
+
+  &__profit--positive {
+    color: var(--color-positive);
+  }
+
+  &__profit--negative {
+    color: var(--color-negative);
+  }
+
+  &__empty {
+    color: var(--color-muted);
+    text-align: center;
+  }
 }
 
-@media (max-width: 620px) { .bets-journal__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bets-journal__summary article:nth-child(3) { border-left: 0; border-top: 1px solid var(--color-line); } .bets-journal__summary article:nth-child(4) { border-top: 1px solid var(--color-line); } .bets-journal__toolbar { align-items: start; flex-direction: column; } }
+@keyframes bets-journal-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 620px) {
+  .bets-journal__storage-state {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bets-journal__storage-state button {
+    width: 100%;
+  }
+
+  .bets-journal__panel {
+    min-width: 0;
+    padding: 0.75rem;
+  }
+
+  .bets-journal__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bets-journal__summary article:nth-child(3) {
+    border-top: 1px solid var(--color-line);
+    border-left: 0;
+  }
+
+  .bets-journal__summary article:nth-child(4) {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .bets-journal__toolbar {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .bets-journal__tools,
+  .bets-journal__filters,
+  .bets-journal__tools button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .bets-journal__table {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .bets-journal__table table,
+  .bets-journal__table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .bets-journal__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  .bets-journal__table tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .bets-journal__table tr {
+    display: grid;
+    min-width: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 0.55rem;
+    background: var(--color-background);
+    padding: 0.75rem;
+  }
+
+  .bets-journal__table td {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(5.7rem, 0.42fr) minmax(0, 1fr);
+    gap: 0.5rem;
+    border: 0;
+    padding: 0.38rem 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .bets-journal__table td::before {
+    color: var(--color-muted);
+    content: attr(data-label);
+    font-size: 0.7rem;
+  }
+
+  .bets-journal__table td small {
+    grid-column: 2;
+  }
+
+  .bets-journal__table select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .bets-journal__row-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bets-journal__row-actions button {
+    width: 100%;
+  }
+
+  .bets-journal__action-label {
+    display: inline;
+  }
+}

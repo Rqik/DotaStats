@@ -1,11 +1,30 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { ApiError, OpenDotaClient } from './client';
 
 const schema = z.object({ id: z.number() }).passthrough();
 const response = (body: unknown, status = 200, headers?: HeadersInit): Response => new Response(JSON.stringify(body), { status, headers });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('OpenDotaClient', () => {
+  it('binds the default native fetch receiver to globalThis', async () => {
+    let calls = 0;
+    const receiverSensitiveFetch: typeof fetch = function fetchWithNativeReceiver(this: unknown): Promise<Response> {
+      if (this !== globalThis) throw new TypeError('Illegal invocation');
+      calls += 1;
+      return Promise.resolve(response({ id: 7 }));
+    };
+    vi.stubGlobal('fetch', receiverSensitiveFetch);
+
+    const client = new OpenDotaClient();
+
+    await expect(client.get('/heroes', schema)).resolves.toEqual({ id: 7 });
+    expect(calls).toBe(1);
+  });
+
   it('returns schema-validated data and appends a personal API key', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({ id: 7, future_field: true }));
     const client = new OpenDotaClient({ apiKey: 'local-key', fetchFn });

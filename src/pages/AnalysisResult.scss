@@ -1,28 +1,89 @@
 .analysis-result {
   min-width: 0;
-  &__back, &__secondary, &__primary { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 0.45rem; padding: 0.65rem 0.8rem; }
-  &__back { margin-bottom: 1rem; border: 0; background: transparent; color: var(--color-muted); }
-  &__secondary { border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-text); }
-  &__primary { border: 0; background: var(--color-accent); color: #151515; font-weight: 700; }
-  &__hero, &__coverage { display: grid; gap: 0.75rem; margin-bottom: 0.75rem; }
-  &__hero { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  &__selection, &__probability, &__edge, &__coverage article, &__panel { border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); padding: 1.2rem; }
-  &__selection > span, &__edge > span, &__coverage span, &__coverage small, &__selection dt { color: var(--color-muted); font-size: 0.75rem; }
-  &__selection h2 { margin: 0.5rem 0 1rem; } &__selection h2 b, &__edge strong, &__coverage strong { color: var(--color-accent); }
-  &__selection dl { display: flex; gap: 1rem; } &__selection dt, &__selection dd { margin: 0; } &__selection dd { margin-top: 0.25rem; }
-  &__selection p, &__edge p { display: flex; gap: 0.5rem; align-items: flex-start; margin: 1rem 0 0; color: var(--color-positive); font-size: 0.8rem; }
-  &__selection p span { display: grid; gap: 0.2rem; } &__selection p strong { color: var(--color-positive); }
-  &__probability { display: grid; place-items: center; } &__edge strong, &__coverage strong { display: block; margin: 0.7rem 0; font-size: 2rem; }
-  &__edge > div { position: relative; height: 0.3rem; background: linear-gradient(90deg, var(--color-negative) 0 30%, var(--color-warning) 30% 58%, var(--color-positive) 58%); }
-  &__edge > div i, &__edge > div b { position: absolute; top: -0.2rem; width: 0.25rem; height: 0.7rem; background: var(--color-text); } &__edge > div i { left: 50%; } &__edge > div b { left: 78%; }
-  &__edge p { color: var(--color-muted); } &__coverage { grid-template-columns: repeat(3, minmax(0, 1fr)); } &__coverage strong, &__coverage small { display: block; }
-  &__panel { margin-top: 0.75rem; } &__panel h2 { margin: 0; font-size: 1.1rem; }
-  &__formula { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 1rem; } &__formula span { display: grid; gap: 0.25rem; color: var(--color-muted); } &__formula b, &__formula strong { color: var(--color-accent); font-size: 1.3rem; }
-  &__table { overflow-x: auto; margin-top: 1rem; } &__table table { width: 100%; border-collapse: collapse; } &__table th, &__table td { border-bottom: 1px solid var(--color-line); padding: 0.75rem; text-align: left; white-space: nowrap; } &__table th { color: var(--color-muted); font-size: 0.7rem; }
-  &__status { display: inline-flex; align-items: center; gap: 0.25rem; border-radius: 0.25rem; padding: 0.3rem 0.4rem; font-size: 0.7rem; } &__status--covered { background: color-mix(in srgb, var(--color-positive), transparent 85%); color: var(--color-positive); } &__status--missed { background: color-mix(in srgb, var(--color-negative), transparent 85%); color: var(--color-negative); }
+
+  &__back,
+  &__secondary,
+  &__primary,
+  &__empty button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 0.45rem;
+    padding: 0.65rem 0.8rem;
+  }
+
+  &__back {
+    margin-bottom: 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-muted);
+  }
+
+  &__secondary {
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  &__primary,
+  &__empty button {
+    border: 0;
+    background: var(--color-accent);
+    color: #151515;
+    font-weight: 700;
+  }
+
+  &__primary:disabled {
+    cursor: default;
+    opacity: 0.75;
+  }
+
+  &__empty,
+  &__state,
+  &__warnings {
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background: var(--color-surface);
+    padding: 1.25rem;
+  }
+
+  &__empty {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+    color: var(--color-muted);
+  }
+
+  &__empty p,
+  &__state {
+    margin: 0;
+  }
+
+  &__warnings {
+    margin-top: 0.75rem;
+    border-color: color-mix(in srgb, var(--color-warning), transparent 55%);
+  }
+
+  &__warnings h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  &__warnings ul {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0.75rem 0 0;
+    padding-left: 1.25rem;
+    color: var(--color-muted);
+  }
 }
-.probability-chart { width: 100%; max-width: 15rem; overflow: visible; } .probability-chart__track, .probability-chart__value { fill: none; stroke-linecap: round; stroke-width: 12; } .probability-chart__track { stroke: #292e32; } .probability-chart__value { stroke: var(--color-accent); } .probability-chart__dot { fill: var(--color-accent); stroke: var(--color-background); stroke-width: 2; } .probability-chart__number { fill: var(--color-text); font-size: 25px; font-weight: 700; } .probability-chart__label { fill: var(--color-muted); font-size: 7px; }
 
-@media (max-width: 900px) { .analysis-result__hero { grid-template-columns: 1fr; } }
-
-@media (max-width: 620px) { .analysis-result__coverage { grid-template-columns: 1fr; } .analysis-result__formula { align-items: start; flex-direction: column; } .analysis-result__formula i { display: none; } }
+@media (max-width: 620px) {
+  .analysis-result {
+    &__secondary,
+    &__primary {
+      width: 100%;
+    }
+  }
+}
