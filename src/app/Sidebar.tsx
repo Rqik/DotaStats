@@ -1,4 +1,12 @@
-import { BookOpen, FileSearch, HardDrive, LayoutDashboard, Settings, X } from 'lucide-react';
+import {
+  BookOpen,
+  ChevronRight,
+  FileSearch,
+  HardDrive,
+  LayoutDashboard,
+  Settings,
+  X,
+} from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 
@@ -55,13 +63,19 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           ))}
         </nav>
         <div className="sidebar__spacer" />
-        <div className="sidebar__local">
+        <NavLink
+          className="sidebar__local"
+          to="/settings"
+          onClick={onClose}
+          aria-label="Открыть настройки локальных данных"
+        >
           <HardDrive size={17} />
           <span>
             <strong>Локальные данные</strong>
-            <small>IndexedDB этого браузера</small>
+            <small>Экспорт, импорт и очистка</small>
           </span>
-        </div>
+          <ChevronRight className="sidebar__local-arrow" size={16} aria-hidden="true" />
+        </NavLink>
       </aside>
     </>
   );

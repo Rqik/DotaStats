@@ -28,19 +28,10 @@
   gap: 0.65rem;
 
   &__mark {
-    display: grid;
     width: 2rem;
     height: 2rem;
-    place-items: center;
-    border: 1px solid color-mix(in srgb, var(--color-accent), transparent 55%);
+    flex: 0 0 auto;
     border-radius: 0.5rem;
-    background: color-mix(in srgb, var(--color-accent), transparent 88%);
-    color: var(--color-accent);
-  }
-
-  &__mark span {
-    width: 0.9rem;
-    border-top: 2px solid currentcolor;
   }
 
   &__title,
@@ -141,6 +132,18 @@
     padding: 0.8rem;
     color: var(--color-muted);
     font-size: 0.75rem;
+    text-decoration: none;
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--color-accent), transparent 55%);
+      background: var(--color-surface-raised);
+      color: var(--color-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
   }
 
   &__local span,
@@ -151,6 +154,10 @@
 
   &__local small {
     margin-top: 0.2rem;
+  }
+
+  &__local-arrow {
+    margin-left: auto;
   }
 }
 
