@@ -1,6 +1,6 @@
 .team-picker {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.6rem;
 
   &__field {
     display: grid;
@@ -8,6 +8,39 @@
     gap: 0.35rem;
     color: var(--color-muted);
     font-size: 0.78rem;
+  }
+
+  &__league-picker,
+  &__league-filter label {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  &__league-filter {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 12rem));
+    align-items: end;
+    gap: 0.4rem;
+  }
+
+  &__league-filter label {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+  }
+
+  &__league-filter select {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 0.45rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 0.65rem;
+  }
+
+  &__league-filter small {
+    grid-column: 1 / -1;
+    color: var(--color-muted);
+    font-size: 0.7rem;
   }
 
   &__combobox {
@@ -104,7 +137,10 @@
 }
 
 @media (max-width: 620px) {
+  .team-picker__league-filter,
   .team-picker__teams {
     grid-template-columns: 1fr;
   }
+
+  .team-picker__league-filter small { grid-column: auto; }
 }

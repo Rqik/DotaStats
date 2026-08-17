@@ -14,6 +14,13 @@ const betTransferSchema = z.object({
   stakeType: z.enum(['cash', 'freebet']),
   result: z.enum(['pending', 'win', 'loss', 'refund']),
   profit: z.number().finite(),
+  teamA: z.string().trim().min(1).optional(),
+  teamB: z.string().trim().min(1).optional(),
+  market: z.string().trim().min(1).optional(),
+  handicap: z.number().finite().optional(),
+  bookmaker: z.string().trim().min(1).optional(),
+  comment: z.string().trim().min(1).optional(),
+  analysisId: z.string().trim().min(1).optional(),
 }).strict();
 
 const publicSettingsSchema = z.object({

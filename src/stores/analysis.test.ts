@@ -69,6 +69,13 @@ const handicapResult: KillsHandicapAnalysisResult = {
   newest: sample.newest,
   usedMatches: [],
   warnings: [],
+  matchWinProbability: {
+    probability: 0.58,
+    weights: [0.5, 0.5],
+    selected: { signals: 20, wins: 12, losses: 8 },
+    opponent: { signals: 20, wins: 10, losses: 10 },
+    h2h: { signals: 0, wins: 0, losses: 0 },
+  },
 };
 
 beforeEach(() => {

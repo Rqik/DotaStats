@@ -10,6 +10,39 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  &__match-win {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.8fr) minmax(14rem, 1fr) minmax(14rem, 1.2fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background: var(--color-surface);
+    padding: 1.2rem;
+  }
+
+  &__match-win > div {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+  }
+
+  &__match-win span,
+  &__match-win small,
+  &__match-win p {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  &__match-win strong {
+    color: var(--color-accent);
+    font-size: 2rem;
+  }
+
+  &__match-win p {
+    margin: 0;
+  }
+
   &__selection,
   &__probability,
   &__edge,
@@ -77,9 +110,14 @@
 
   &__probability {
     display: grid;
+    gap: 0.5rem;
     place-items: center;
     color: var(--color-muted);
     text-align: center;
+  }
+
+  &__probability > span {
+    font-size: 0.75rem;
   }
 
   &__edge strong,
@@ -153,6 +191,7 @@
 
 @media (max-width: 900px) {
   .handicap-result__hero { grid-template-columns: 1fr; }
+  .handicap-result__match-win { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 620px) {

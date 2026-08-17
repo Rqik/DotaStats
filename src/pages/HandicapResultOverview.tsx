@@ -58,15 +58,32 @@ export function HandicapResultOverview({ input, result }: HandicapResultOverview
           </p>
         </article>
         <article className="handicap-result__probability">
+          <span>Вероятность прохода форы</span>
           {result.probability === null ? (
             <p>Вероятность не рассчитана из-за отсутствия данных.</p>
-          ) : <ProbabilityChart probability={result.probability} />}
+          ) : <ProbabilityChart probability={result.probability} label="Вероятность прохода форы" />}
         </article>
         <article className="handicap-result__edge">
           <span>{statusLabels[result.status]}</span>
           <strong>{result.edge === null ? '—' : `${(result.edge * 100).toFixed(1)} п.п.`}</strong>
           <p><Info size={16} />Положительный запас не гарантирует исход отдельной карты.</p>
         </article>
+      </section>
+      <section className="handicap-result__match-win" aria-label="Вероятность победы">
+        <div>
+          <span>Вероятность победы карты</span>
+          <strong>{percent(result.matchWinProbability.probability)}</strong>
+          <p>Отдельная оценка исхода карты, без форы и без сравнения с коэффициентом и порогом безубыточности; использует те же ответы OpenDota, возраст источника указан выше.</p>
+        </div>
+        <div className="handicap-result__match-win-coverage">
+          <span>Сигналы победителя</span>
+          <small>{input.selectedTeam}: {result.matchWinProbability.selected.signals}; соперник: {result.matchWinProbability.opponent.signals}; личные встречи: {result.matchWinProbability.h2h.signals}</small>
+          <small>{result.matchWinProbability.probability === null ? 'Нужно минимум 10 сигналов победителя в каждой основной выборке.' : 'Покрытие достаточное для расчёта.'}</small>
+        </div>
+        <div>
+          <span>Формула</span>
+          <small>50/50: сглаженные победы выбранной команды и сглаженные поражения соперника; при ≥3 личных встречах — 40/40/20.</small>
+        </div>
       </section>
       <section className="handicap-result__coverage" aria-label="Выборки анализа">
         {samples.map(({ label, value }) => (
@@ -85,7 +102,7 @@ export function HandicapResultOverview({ input, result }: HandicapResultOverview
         ))}
       </section>
       <section className="handicap-result__formula">
-        <h2>Как получена вероятность {percent(result.probability)}</h2>
+        <h2>Как получена вероятность прохода форы {percent(result.probability)}</h2>
         <p>Частоты сглажены формулой (wins + 1) / (matches + 2).</p>
         <div>
           {result.weights.map((weight, index) => (

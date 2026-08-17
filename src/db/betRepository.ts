@@ -15,6 +15,13 @@ const storedBetSchema = z.object({
   profit: z.number().finite(),
   createdAt: z.number().finite().nonnegative(),
   updatedAt: z.number().finite().nonnegative(),
+  teamA: z.string().optional(),
+  teamB: z.string().optional(),
+  market: z.string().optional(),
+  handicap: z.number().finite().optional(),
+  bookmaker: z.string().optional(),
+  comment: z.string().optional(),
+  analysisId: z.string().optional(),
 }).strict();
 
 export interface BetRepository {

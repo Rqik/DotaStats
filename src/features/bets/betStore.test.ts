@@ -234,6 +234,44 @@ describe('IndexedDB-backed bet store', () => {
     expect(store.getState().bets).toEqual([]);
   });
 
+  it('migrates optional metadata without dropping it', async () => {
+    const repository = new MemoryBetRepository();
+    const storage = new MemoryLegacyStorage(legacyPayload({
+      teamA: 'Team A', teamB: 'Team B', market: 'kills', handicap: 5.5,
+      bookmaker: 'Example', comment: 'note', analysisId: 'analysis-1',
+    }));
+    const result = await loadAndMigrateBets(repository, storage, () => 1_000);
+
+    expect(result.error).toBeNull();
+    expect(result.records[0]).toMatchObject({
+      teamA: 'Team A', teamB: 'Team B', market: 'kills', handicap: 5.5,
+      bookmaker: 'Example', comment: 'note', analysisId: 'analysis-1',
+    });
+  });
+
+  it('preserves metadata through create, reload and settlement', async () => {
+    const repository = new MemoryBetRepository();
+    const store = createBetStore({
+      repository,
+      legacyStorage: new MemoryLegacyStorage(null),
+      createId: () => 'metadata-1',
+      now: () => 100,
+    });
+    await initializeBetStore(store);
+    const metadata = {
+      teamA: 'Team A', teamB: 'Team B', market: 'kills', handicap: 5.5,
+      bookmaker: 'Example', comment: 'note', analysisId: 'analysis-1',
+    };
+    await store.getState().createBet({ ...draft(), ...metadata });
+    expect(repository.records[0]).toMatchObject(metadata);
+    await store.getState().settleBet('metadata-1', 'win');
+    expect(repository.records[0]).toMatchObject({ ...metadata, result: 'win' });
+
+    const reloaded = createBetStore({ repository, legacyStorage: new MemoryLegacyStorage(null) });
+    await initializeBetStore(reloaded);
+    expect(reloaded.getState().bets[0]).toMatchObject(metadata);
+  });
+
   it('atomically replaces persisted bets and recalculates imported profit', async () => {
     const repository = new MemoryBetRepository();
     const store = createBetStore({

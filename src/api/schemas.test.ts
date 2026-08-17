@@ -52,6 +52,14 @@ describe('OpenDota response schemas', () => {
     }])).toHaveLength(1);
   });
 
+  it('preserves boolean, null, and rejects invalid winner signals', () => {
+    const base = { match_id: 8_000_000_001, start_time: 1_720_000_000 };
+    expect(openDotaTeamMatchesSchema.parse([{ ...base, radiant_win: true }])[0]?.radiant_win).toBe(true);
+    expect(openDotaTeamMatchesSchema.parse([{ ...base, radiant_win: false }])[0]?.radiant_win).toBe(false);
+    expect(openDotaTeamMatchesSchema.parse([{ ...base, radiant_win: null }])[0]?.radiant_win).toBeNull();
+    expect(openDotaTeamMatchesSchema.safeParse([{ ...base, radiant_win: 'true' }]).success).toBe(false);
+  });
+
   it('accepts partially parsed matches without inventing unavailable graphs', () => {
     const match = openDotaMatchSchema.parse({
       match_id: 8_000_000_001,

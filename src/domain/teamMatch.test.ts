@@ -49,6 +49,15 @@ describe('team match normalization', () => {
     });
   });
 
+  it('derives the queried team winner only from radiant_win', () => {
+    const radiantWin = normalizeTeamMatch({ ...baseMatch, radiant_win: true }, 10);
+    const direLoss = normalizeTeamMatch({ ...baseMatch, radiant_win: true }, 20);
+    const unknown = normalizeTeamMatch({ ...baseMatch, radiant_win: null }, 10);
+    expect(radiantWin.success && radiantWin.data.teamWon).toBe(true);
+    expect(direLoss.success && direLoss.data.teamWon).toBe(false);
+    expect(unknown.success && unknown.data.teamWon).toBeNull();
+  });
+
   it('skips conflicting identity, missing scores and unidentified sides', () => {
     expect(normalizeTeamMatch({ ...baseMatch, radiant_team_id: 20, dire_team_id: 10 }, 10)).toEqual({
       success: false,

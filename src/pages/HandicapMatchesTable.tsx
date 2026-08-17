@@ -15,6 +15,29 @@ const groups = [
 
 const outcomeLabels = { win: 'Выигрыш', loss: 'Проигрыш', refund: 'Возврат' };
 
+interface MarginPresentation {
+  primary: string;
+  detail: string;
+}
+
+function signed(value: number): string {
+  return `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)}`;
+}
+
+export function describeHandicapMargin(margin: number, outcome: HandicapUsedMatch['outcome']): MarginPresentation {
+  if (outcome === 'win') {
+    return { primary: `Запас ${signed(margin)}`, detail: 'Линия пройдена' };
+  }
+  if (outcome === 'refund') {
+    return { primary: 'Ровно по линии', detail: 'Для выигрыша нужно ещё 1 убийство' };
+  }
+  const killsNeeded = Math.floor(Math.abs(margin)) + 1;
+  return {
+    primary: `Не хватило ${killsNeeded} ${killsNeeded === 1 ? 'убийства' : 'убийств'}`,
+    detail: `Итог линии ${signed(margin)}`,
+  };
+}
+
 function formatDate(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
@@ -36,6 +59,7 @@ export function HandicapMatchesTable({ matches, sign, line }: HandicapMatchesTab
   return (
     <section className="handicap-matches">
       <h2>Использованные матчи</h2>
+      <p>«Итог линии» — результат формулы с учётом форы. Для проигранной линии рядом показано целое число убийств, которого не хватило до выигрыша.</p>
       <p>Один матч может входить в несколько групп, но в общей выборке хранится один раз.</p>
       <div
         className="handicap-matches__scroller"
@@ -48,7 +72,7 @@ export function HandicapMatchesTable({ matches, sign, line }: HandicapMatchesTab
               <th>Дата</th>
               <th>Команда / соперник</th>
               <th>Счёт</th>
-              <th>Маржа {sign}{line}</th>
+              <th>Итог линии {sign}{line}</th>
               <th>Исход</th>
               <th>Match ID</th>
             </tr>
@@ -61,23 +85,24 @@ export function HandicapMatchesTable({ matches, sign, line }: HandicapMatchesTab
                 <tr className="handicap-matches__group">
                   <th colSpan={6}>{group.label} · {rows.length}</th>
                 </tr>
-                {rows.map((match) => (
-                  <tr key={`${group.id}-${match.matchId}`}>
+                {rows.map((match) => {
+                  const margin = describeHandicapMargin(match.margin, match.outcome);
+                  return <tr key={`${group.id}-${match.matchId}`}>
                     <td>{formatDate(match.date)}</td>
                     <td>
                       <strong>{match.subjectTeamName ?? `Team ${match.subjectTeamId ?? '—'}`}</strong>
                       <small>{match.opponentTeamName ?? `Team ${match.opponentTeamId ?? '—'}`}</small>
                     </td>
                     <td>{match.score}</td>
-                    <td>{match.margin > 0 ? '+' : ''}{match.margin}</td>
+                    <td className="handicap-matches__margin"><strong>{margin.primary}</strong><small>{margin.detail}</small></td>
                     <td>
                       <span className={`handicap-matches__status handicap-matches__status--${match.outcome}`}>
                         {outcomeLabels[match.outcome]}
                       </span>
                     </td>
                     <td>#{match.matchId}</td>
-                  </tr>
-                ))}
+                  </tr>;
+                })}
               </tbody>
             );
           })}

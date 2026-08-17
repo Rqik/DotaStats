@@ -11,10 +11,17 @@ const columns = [
   'stakeType',
   'result',
   'profit',
+  'teamA',
+  'teamB',
+  'market',
+  'handicap',
+  'bookmaker',
+  'comment',
+  'analysisId',
 ] as const;
 
-function csvCell(value: string | number): string {
-  return `"${String(value).replace(/"/g, '""')}"`;
+function csvCell(value: string | number | undefined): string {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
 }
 
 export function createBetsCsv(bets: readonly Bet[]): string {

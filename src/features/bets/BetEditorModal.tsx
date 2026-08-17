@@ -22,6 +22,7 @@ interface BetFormErrors {
   selection?: string;
   odds?: string;
   stake?: string;
+  handicap?: string;
 }
 
 const resultLabels: Record<BetResult, string> = {
@@ -52,6 +53,13 @@ export function BetEditorModal({ bet, returnFocusTo, onClose, onSubmit }: BetEdi
   const [stake, setStake] = useState(bet?.stake.toString() ?? '');
   const [stakeType, setStakeType] = useState<StakeType>(bet?.stakeType ?? 'cash');
   const [result, setResult] = useState<BetResult>(bet?.result ?? 'pending');
+  const [teamA, setTeamA] = useState(bet?.teamA ?? '');
+  const [teamB, setTeamB] = useState(bet?.teamB ?? '');
+  const [market, setMarket] = useState(bet?.market ?? '');
+  const [handicap, setHandicap] = useState(bet?.handicap?.toString() ?? '');
+  const [bookmaker, setBookmaker] = useState(bet?.bookmaker ?? '');
+  const [comment, setComment] = useState(bet?.comment ?? '');
+  const [analysisId, setAnalysisId] = useState(bet?.analysisId ?? '');
   const [errors, setErrors] = useState<BetFormErrors>({});
 
   useEffect(() => {
@@ -101,12 +109,14 @@ export function BetEditorModal({ bet, returnFocusTo, onClose, onSubmit }: BetEdi
     const nextErrors: BetFormErrors = {};
     const parsedOdds = Number(odds);
     const parsedStake = Number(stake);
+    const parsedHandicap = handicap.trim() ? Number(handicap) : undefined;
 
     if (!tournament.trim()) nextErrors.tournament = 'Укажите турнир.';
     if (!match.trim()) nextErrors.match = 'Укажите матч.';
     if (!selection.trim()) nextErrors.selection = 'Укажите выбранный исход.';
     if (!Number.isFinite(parsedOdds) || parsedOdds <= 1) nextErrors.odds = 'Коэффициент должен быть больше 1.';
     if (!Number.isFinite(parsedStake) || parsedStake < 0) nextErrors.stake = 'Сумма должна быть неотрицательной.';
+    if (handicap.trim() && !Number.isFinite(parsedHandicap)) nextErrors.handicap = 'Фора должна быть числом.';
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -120,6 +130,13 @@ export function BetEditorModal({ bet, returnFocusTo, onClose, onSubmit }: BetEdi
       stake: parsedStake,
       stakeType,
       result,
+      ...(teamA.trim() ? { teamA: teamA.trim() } : {}),
+      ...(teamB.trim() ? { teamB: teamB.trim() } : {}),
+      ...(market.trim() ? { market: market.trim() } : {}),
+      ...(parsedHandicap !== undefined ? { handicap: parsedHandicap } : {}),
+      ...(bookmaker.trim() ? { bookmaker: bookmaker.trim() } : {}),
+      ...(comment.trim() ? { comment: comment.trim() } : {}),
+      ...(analysisId.trim() ? { analysisId: analysisId.trim() } : {}),
     });
   };
 
@@ -142,6 +159,19 @@ export function BetEditorModal({ bet, returnFocusTo, onClose, onSubmit }: BetEdi
           <label>Тип ставки<select value={stakeType} onChange={(event) => setStakeType(event.target.value as StakeType)}><option value="cash">Денежная</option><option value="freebet">Фрибет без возврата номинала</option></select></label>
           <label>Результат<select value={result} onChange={(event) => setResult(event.target.value as BetResult)}>{(Object.keys(resultLabels) as BetResult[]).map((value) => <option key={value} value={value}>{resultLabels[value]}</option>)}</select></label>
         </div>
+        <div className="bet-editor__row">
+          <label>Команда A<input value={teamA} onChange={(event) => setTeamA(event.target.value)} /></label>
+          <label>Команда B<input value={teamB} onChange={(event) => setTeamB(event.target.value)} /></label>
+        </div>
+        <div className="bet-editor__row">
+          <label>Рынок<input value={market} onChange={(event) => setMarket(event.target.value)} /></label>
+          <label>Фора<input type="number" step="any" inputMode="decimal" value={handicap} onChange={(event) => setHandicap(event.target.value)} aria-invalid={Boolean(errors.handicap)} aria-describedby={errors.handicap ? 'bet-handicap-error' : undefined} />{errors.handicap ? <small id="bet-handicap-error">{errors.handicap}</small> : null}</label>
+        </div>
+        <div className="bet-editor__row">
+          <label>Букмекер<input value={bookmaker} onChange={(event) => setBookmaker(event.target.value)} /></label>
+          <label>ID анализа<input value={analysisId} onChange={(event) => setAnalysisId(event.target.value)} /></label>
+        </div>
+        <label>Комментарий<textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={2} /></label>
         <p className="bet-editor__note">Прибыль рассчитывается автоматически. Для фрибета номинал не возвращается и не считается денежным оборотом.</p>
         <footer className="bet-editor__actions"><button type="button" onClick={onClose}>Отмена</button><button className="bet-editor__save" type="submit">{bet ? 'Сохранить изменения' : 'Добавить запись'}</button></footer>
       </form>

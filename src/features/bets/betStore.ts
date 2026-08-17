@@ -21,6 +21,13 @@ export interface Bet {
   stakeType: StakeType;
   result: BetResult;
   profit: number;
+  teamA?: string;
+  teamB?: string;
+  market?: string;
+  handicap?: number;
+  bookmaker?: string;
+  comment?: string;
+  analysisId?: string;
 }
 
 export type BetDraft = Omit<Bet, 'id' | 'profit'>;
@@ -70,6 +77,13 @@ const legacyBetSchema = z.object({
   stakeType: z.enum(['cash', 'freebet']).optional().default('cash'),
   result: z.enum(['pending', 'win', 'loss', 'refund']),
   profit: z.number().finite().optional(),
+  teamA: z.string().optional(),
+  teamB: z.string().optional(),
+  market: z.string().optional(),
+  handicap: z.number().finite().optional(),
+  bookmaker: z.string().optional(),
+  comment: z.string().optional(),
+  analysisId: z.string().optional(),
 }).passthrough();
 
 const legacyStorageSchema = z.object({
@@ -114,6 +128,13 @@ export function fromStoredBet(record: StoredBet): Bet {
     stakeType: record.stakeType,
     result: record.result,
     profit: calculatedProfit(record),
+    teamA: record.teamA,
+    teamB: record.teamB,
+    market: record.market,
+    handicap: record.handicap,
+    bookmaker: record.bookmaker,
+    comment: record.comment,
+    analysisId: record.analysisId,
   };
 }
 
@@ -142,6 +163,13 @@ export function parseLegacyBets(serialized: string): Bet[] | null {
       stakeType: bet.stakeType,
       result: bet.result,
       profit: calculatedProfit(bet),
+      teamA: bet.teamA,
+      teamB: bet.teamB,
+      market: bet.market,
+      handicap: bet.handicap,
+      bookmaker: bet.bookmaker,
+      comment: bet.comment,
+      analysisId: bet.analysisId,
     }));
     return bets.filter((bet) => !knownPrototypeSeeds.some((seed) => sameBet(seed, bet)));
   } catch {
@@ -159,7 +187,14 @@ function sameBet(left: Bet, right: Bet): boolean {
     && left.stake === right.stake
     && left.stakeType === right.stakeType
     && left.result === right.result
-    && left.profit === right.profit;
+    && left.profit === right.profit
+    && left.teamA === right.teamA
+    && left.teamB === right.teamB
+    && left.market === right.market
+    && left.handicap === right.handicap
+    && left.bookmaker === right.bookmaker
+    && left.comment === right.comment
+    && left.analysisId === right.analysisId;
 }
 
 function sameBetCollection(records: readonly StoredBet[], bets: readonly Bet[]): boolean {
@@ -396,6 +431,13 @@ export function createBetStore(options: CreateBetStoreOptions = {}): BetStoreHoo
           stake: previous.stake,
           stakeType: previous.stakeType,
           result,
+          teamA: previous.teamA,
+          teamB: previous.teamB,
+          market: previous.market,
+          handicap: previous.handicap,
+          bookmaker: previous.bookmaker,
+          comment: previous.comment,
+          analysisId: previous.analysisId,
         });
       },
     };

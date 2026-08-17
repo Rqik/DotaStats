@@ -209,7 +209,15 @@ export default function BetsJournal() {
                 <tbody>
                   {visibleBets.map((bet) => (
                     <tr key={bet.id}>
-                      <td data-label="Матч"><strong>{bet.match}</strong><small>{bet.tournament} · {bet.date}</small></td>
+                      <td data-label="Матч">
+                        <strong>{bet.match}</strong>
+                        <small>{bet.tournament} · {bet.date}</small>
+                        {(bet.teamA || bet.teamB || bet.market || bet.handicap !== undefined || bet.bookmaker || bet.comment || bet.analysisId) ? (
+                          <small className="bets-journal__metadata">
+                            {[bet.teamA && `A: ${bet.teamA}`, bet.teamB && `B: ${bet.teamB}`, bet.market, bet.handicap !== undefined && `Фора: ${bet.handicap}`, bet.bookmaker && `Букмекер: ${bet.bookmaker}`, bet.comment, bet.analysisId && `Анализ: ${bet.analysisId}`].filter(Boolean).join(' · ')}
+                          </small>
+                        ) : null}
+                      </td>
                       <td data-label="Исход">{bet.selection}</td>
                       <td data-label="Тип">{bet.stakeType === 'cash' ? 'Деньги' : 'Фрибет'}</td>
                       <td data-label="Коэффициент">{bet.odds.toFixed(2)}</td>

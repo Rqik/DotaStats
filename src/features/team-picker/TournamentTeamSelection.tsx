@@ -69,7 +69,7 @@ export function TournamentTeamSelection({ value, onChange }: TournamentTeamSelec
   const teamItems = teams?.data ?? [];
   const leagueStatus = error || (leagues && leagueItems.length === 0 ? 'Список лиг пуст.' : describeDataSource(leagues, showCacheAge));
   const teamsStatus = value.league
-    ? (loadingTeams ? 'Загружаем команды выбранного выпуска…' : teams && teamItems.length === 0 ? 'Для этого выпуска команды не найдены.' : describeDataSource(teams, showCacheAge))
+    ? (loadingTeams ? `Загружаем команды только из выбранного выпуска «${value.league.name}»…` : teams && teamItems.length === 0 ? `Для выпуска «${value.league.name}» команды не найдены.` : `Команды только из выпуска «${value.league.name}». ${describeDataSource(teams, showCacheAge)}`)
     : 'Сначала найдите лигу и выберите конкретный выпуск турнира.';
 
   return <div className="team-picker">

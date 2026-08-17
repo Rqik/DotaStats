@@ -23,6 +23,7 @@ import {
   weightedProbability,
   type AnalysisStatus,
 } from '../domain/probability';
+import { matchWinProbability, type MatchWinProbabilityResult, type MatchWinSample } from '../domain/matchWinProbability';
 
 const handicapAnalysisInputSchema = z.object({
   selectedTeamId: z.number().int().positive().safe(),
@@ -32,7 +33,7 @@ const handicapAnalysisInputSchema = z.object({
   sign: z.enum(['plus', 'minus']),
   line: z.number().finite().nonnegative(),
   odds: z.number().finite().gt(1),
-  sample: z.union([z.literal(10), z.literal(20), z.literal(30)]),
+  sample: z.union([z.literal(10), z.literal(20), z.literal(30), z.literal(50), z.literal(100)]),
   forceRefresh: z.boolean().optional(),
 }).refine((input) => input.selectedTeamId !== input.opponentTeamId, {
   message: 'Selected and opponent teams must be different',
@@ -47,7 +48,7 @@ export interface KillsHandicapAnalysisInput {
   sign: HandicapKind;
   line: number;
   odds: number;
-  sample: 10 | 20 | 30;
+  sample: 10 | 20 | 30 | 50 | 100;
   forceRefresh?: boolean;
 }
 
@@ -109,7 +110,7 @@ export interface KillsHandicapAnalysisResult {
   line: number;
   signedHandicap: number;
   odds: number;
-  sample: 10 | 20 | 30;
+  sample: 10 | 20 | 30 | 50 | 100;
   selectedSample: HandicapSampleResult;
   opponentSample: HandicapSampleResult;
   h2hSample: HandicapSampleResult;
@@ -123,6 +124,7 @@ export interface KillsHandicapAnalysisResult {
   newest: string | null;
   usedMatches: HandicapUsedMatch[];
   warnings: HandicapAnalysisWarning[];
+  matchWinProbability: MatchWinProbabilityResult;
 }
 
 export interface TeamMatchesRepository {
@@ -134,6 +136,7 @@ export interface TeamMatchesRepository {
 
 interface SettlementRow extends HandicapUsedMatch {
   groups: [HandicapSampleGroup];
+  teamWon: boolean | null;
 }
 
 function settleRow(
@@ -166,7 +169,14 @@ function settleRow(
     score: `${subjectKills}:${opponentKills}`,
     margin: settlement.margin,
     outcome: settlement.outcome,
+    teamWon: match.teamWon,
   };
+}
+
+function matchWinSample(rows: readonly SettlementRow[]): MatchWinSample {
+  const valid = rows.filter((row) => row.teamWon !== null);
+  const wins = valid.filter((row) => row.teamWon === true).length;
+  return { signals: valid.length, wins, losses: valid.length - wins };
 }
 
 function sampleResult(
@@ -328,6 +338,11 @@ export async function analyzeKillsHandicap(
   });
 
   const usedMatches = combineUsedMatches([selectedRows, opponentRows, h2hRows], warnings);
+  const winProbability = matchWinProbability(
+    matchWinSample(selectedRows),
+    matchWinSample(opponentRows),
+    matchWinSample(h2hRows),
+  );
   const window = dataWindow(usedMatches);
   const breakeven = breakevenProbability(value.odds);
   let probability: number | null = null;
@@ -366,5 +381,6 @@ export async function analyzeKillsHandicap(
     newest: window.newest,
     usedMatches,
     warnings,
+    matchWinProbability: winProbability,
   };
 }

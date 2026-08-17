@@ -34,7 +34,7 @@ describe('bets CSV export', () => {
     const csv = createBetsCsv(bets);
     expect(csv.startsWith('\uFEFF')).toBe(true);
     expect(csv.split('\r\n')[0]).toBe(
-      '\uFEFF"id","date","tournament","match","selection","odds","stake","stakeType","result","profit"',
+      '\uFEFF"id","date","tournament","match","selection","odds","stake","stakeType","result","profit","teamA","teamB","market","handicap","bookmaker","comment","analysisId"',
     );
     expect(csv.endsWith('\r\n')).toBe(true);
   });
@@ -45,5 +45,11 @@ describe('bets CSV export', () => {
     expect(csv).toContain('"Radiant\nпобеда"');
     expect(csv).toContain('"cash","win","100"');
     expect(csv).toContain('"freebet","loss","0"');
+  });
+
+  it('preserves metadata and emits empty metadata cells for legacy bets', () => {
+    const csv = createBetsCsv([{ ...bets[0], teamA: 'Radiant', market: 'Победа', handicap: -2.5, bookmaker: 'Local', comment: 'note', analysisId: 'analysis-1' }]);
+    expect(csv).toContain('"Radiant","","Победа","-2.5","Local","note","analysis-1"');
+    expect(createBetsCsv(bets)).toContain('"100","","","","","",""');
   });
 });

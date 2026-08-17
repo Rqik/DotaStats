@@ -8,8 +8,9 @@
 
   &__modes { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 1rem; }
   &__workspace { grid-template-columns: minmax(0, 1fr) 18rem; align-items: start; }
-  &__fields { grid-template-columns: 1.2fr 1fr 0.8fr; margin-top: 1rem; }
-  &__form, &__summary { min-width: 0; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); padding: 1.25rem; }
+  &__fields { grid-template-columns: 1.2fr 1fr 0.8fr; gap: 0.65rem; margin-top: 0.75rem; }
+  &__form, &__summary { min-width: 0; border: 1px solid var(--color-line); border-radius: 0.65rem; background: var(--color-surface); padding: 1rem; }
+  &__form > h2 { margin: 0 0 0.75rem; font-size: 1.35rem; }
   &__mode { display: grid; grid-template-columns: auto 1fr auto; gap: 0.65rem; align-items: center; border: 1px solid var(--color-line); border-radius: 0.6rem; background: var(--color-surface); color: var(--color-text); padding: 1rem; text-align: left; }
   &__mode > span { min-width: 0; }
   &__mode--active { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent), var(--color-surface) 93%); }
@@ -18,12 +19,18 @@
   &__fields label, &__match-id { display: grid; gap: 0.4rem; color: var(--color-muted); font-size: 0.8rem; }
   &__form input, &__form select { width: 100%; border: 1px solid var(--color-line); border-radius: 0.45rem; outline: 0; background: var(--color-background); color: var(--color-text); padding: 0.7rem; }
   &__fields label { position: relative; }
-  &__fields label svg { position: absolute; right: 0.65rem; bottom: 0.7rem; pointer-events: none; }
-  &__fields fieldset { display: grid; grid-template-columns: 2.25rem 2.25rem 1fr; gap: 0; margin: 0; border: 0; padding: 0; }
+  &__fields fieldset { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.4rem; min-width: 0; margin: 0; border: 0; padding: 0; }
+  &__fields .new-analysis__sign-control { grid-template-columns: auto minmax(0, 1fr); }
+  &__sign-control > div { display: flex; overflow: hidden; border-radius: 0.4rem; }
+  &__sign-control > .new-analysis__sign-value { grid-column: 1 / -1; }
   &__fields legend { margin-bottom: 0.4rem; color: var(--color-muted); font-size: 0.8rem; }
-  &__sign { border: 1px solid var(--color-line); background: var(--color-background); color: var(--color-muted); }
+  &__sign { min-width: 2.5rem; border: 1px solid var(--color-line); background: var(--color-background); color: var(--color-muted); }
+  &__sign + &__sign { border-left: 0; }
   &__sign--active { background: var(--color-accent); color: #151515; }
-  &__sample { display: flex; gap: 0.4rem; margin-top: 1rem; }
+  &__sign:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  &__sign-value { color: var(--color-muted); font-size: 0.75rem; }
+  &__sample { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.75rem; }
+  &__sample-note { flex: 1 0 100%; color: var(--color-muted); font-size: 0.75rem; }
   &__sample-option { border: 1px solid var(--color-line); border-radius: 0.4rem; background: var(--color-background); color: var(--color-muted); padding: 0.5rem 0.75rem; }
   &__sample-option--active { border-color: var(--color-accent); color: var(--color-accent); }
   &__match-id { max-width: 30rem; margin-top: 1rem; }
@@ -41,4 +48,8 @@
 
 @media (max-width: 900px) { .new-analysis__workspace { grid-template-columns: 1fr; } }
 
-@media (max-width: 620px) { .new-analysis__modes, .new-analysis__fields { grid-template-columns: 1fr; } }
+@media (max-width: 620px) {
+  .new-analysis__modes,
+  .new-analysis__fields { grid-template-columns: 1fr; }
+  .new-analysis__sample-option { flex: 1 1 calc(50% - 0.4rem); min-width: 0; }
+}

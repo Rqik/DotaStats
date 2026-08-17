@@ -26,6 +26,13 @@ export interface StoredBet {
   profit: number;
   createdAt: number;
   updatedAt: number;
+  teamA?: string;
+  teamB?: string;
+  market?: string;
+  handicap?: number;
+  bookmaker?: string;
+  comment?: string;
+  analysisId?: string;
 }
 
 export interface CacheRecord<T = unknown> {

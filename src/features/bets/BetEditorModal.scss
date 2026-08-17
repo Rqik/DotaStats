@@ -62,13 +62,18 @@
   }
 
   &__form input,
-  &__form select {
+  &__form select,
+  &__form textarea {
     width: 100%;
     border: 1px solid var(--color-line);
     border-radius: 0.4rem;
     background: var(--color-background);
     color: var(--color-text);
     padding: 0.65rem;
+  }
+
+  &__form textarea {
+    resize: vertical;
   }
 
   &__form input[aria-invalid='true'] {

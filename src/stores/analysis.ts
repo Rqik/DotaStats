@@ -17,7 +17,7 @@ import {
 } from '../features/analysis/analysisHistoryClient';
 
 export type HandicapSign = 'plus' | 'minus';
-export type AnalysisSampleSize = 10 | 20 | 30;
+export type AnalysisSampleSize = 10 | 20 | 30 | 50 | 100;
 
 export interface HandicapAnalysisInput {
   leagueId: number;

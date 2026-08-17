@@ -26,11 +26,13 @@ function teamMatch(options: {
   opposingKills: number | null;
   opposingTeamId: number;
   opposingTeamName?: string;
+  radiantWin?: boolean | null;
 }): OpenDotaTeamMatch {
   return {
     match_id: options.matchId,
     start_time: options.startTime ?? 1_720_000_000 + options.matchId,
     radiant: options.queriedRadiant,
+    radiant_win: options.radiantWin,
     radiant_score: options.queriedRadiant ? options.queriedKills : options.opposingKills,
     dire_score: options.queriedRadiant ? options.opposingKills : options.queriedKills,
     opposing_team_id: options.opposingTeamId,
@@ -49,6 +51,92 @@ function repositoryFor(selected: OpenDotaTeamMatch[], opponent: OpenDotaTeamMatc
 }
 
 describe('analyzeKillsHandicap', () => {
+  it.each([50, 100] as const)('accepts a %s-card sample size', async (sample) => {
+    await expect(analyzeKillsHandicap({ ...baseInput, sample }, repositoryFor([], []))).resolves.toMatchObject({ sample });
+  });
+
+  it('rejects a sample size of 40', async () => {
+    await expect(analyzeKillsHandicap(
+      { ...baseInput, sample: 40 } as unknown as KillsHandicapAnalysisInput,
+      repositoryFor([], []),
+    )).rejects.toMatchObject({ kind: 'invalid_request' });
+  });
+
+  it('does not infer winner signals from kill scores when radiant_win is absent', async () => {
+    const selected = Array.from({ length: 10 }, (_, index) => teamMatch({
+      matchId: 700 + index,
+      queriedRadiant: true,
+      queriedKills: 20,
+      opposingKills: 10,
+      opposingTeamId: 3,
+    }));
+    const opponent = Array.from({ length: 10 }, (_, index) => teamMatch({
+      matchId: 700 + index,
+      queriedRadiant: true,
+      queriedKills: 20,
+      opposingKills: 10,
+      opposingTeamId: 4,
+    }));
+    const result = await analyzeKillsHandicap(baseInput, repositoryFor(selected, opponent));
+    expect(result.matchWinProbability).toMatchObject({
+      probability: null,
+      selected: { signals: 0, wins: 0, losses: 0 },
+      opponent: { signals: 0, wins: 0, losses: 0 },
+    });
+  });
+
+  it('keeps 50/50 weights when there are fewer than three valid H2H signals', async () => {
+    const selected = Array.from({ length: 10 }, (_, index) => teamMatch({
+      matchId: 800 + index,
+      queriedRadiant: true,
+      queriedKills: 20,
+      opposingKills: 10,
+      opposingTeamId: index < 2 ? 2 : 3,
+      radiantWin: true,
+    }));
+    const opponent = Array.from({ length: 10 }, (_, index) => teamMatch({
+      matchId: 800 + index,
+      queriedRadiant: true,
+      queriedKills: 20,
+      opposingKills: 10,
+      opposingTeamId: 4,
+      radiantWin: false,
+    }));
+    const result = await analyzeKillsHandicap(baseInput, repositoryFor(selected, opponent));
+    expect(result.matchWinProbability.weights).toEqual([0.5, 0.5]);
+    expect(result.matchWinProbability.h2h.signals).toBe(2);
+  });
+
+  it('returns a separate winner-signal probability without edge or breakeven', async () => {
+    const selected = Array.from({ length: 10 }, (_, index) => teamMatch({
+      matchId: 600 + index,
+      queriedRadiant: true,
+      queriedKills: 20,
+      opposingKills: 10,
+      opposingTeamId: 2,
+      radiantWin: index < 7,
+    }));
+    const opponent = Array.from({ length: 10 }, (_, index) => teamMatch({
+      matchId: 600 + index,
+      queriedRadiant: true,
+      queriedKills: 20,
+      opposingKills: 10,
+      opposingTeamId: 1,
+      radiantWin: index < 4,
+    }));
+
+    const result = await analyzeKillsHandicap(baseInput, repositoryFor(selected, opponent));
+
+    expect(result.matchWinProbability).toMatchObject({
+      probability: expect.any(Number),
+      weights: [0.4, 0.4, 0.2],
+      selected: { signals: 10, wins: 7, losses: 3 },
+      opponent: { signals: 10, wins: 4, losses: 6 },
+    });
+    expect(result.matchWinProbability).not.toHaveProperty('edge');
+    expect(result.matchWinProbability).not.toHaveProperty('breakeven');
+  });
+
   it('uses selected-team, opponent-opponents and H2H directionality exactly', async () => {
     const selected = [
       teamMatch({ matchId: 101, queriedRadiant: true, queriedKills: 10, opposingKills: 14, opposingTeamId: 2, opposingTeamName: 'Opponent' }),

@@ -231,6 +231,11 @@
   }
 }
 
+.bets-journal__metadata {
+  color: var(--color-muted);
+  font-size: 0.7rem;
+}
+
 @keyframes bets-journal-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 620px) {

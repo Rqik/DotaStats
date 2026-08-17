@@ -4,6 +4,7 @@ export interface TeamMatchData {
   match_id: number;
   start_time: number;
   radiant?: boolean;
+  radiant_win?: boolean | null;
   radiant_score?: number | null;
   dire_score?: number | null;
   radiant_team_id?: number | null;
@@ -29,6 +30,7 @@ export interface NormalizedTeamMatch {
   opponentKills: number;
   leagueId: number | null;
   leagueName: string | null;
+  teamWon: boolean | null;
 }
 
 export type TeamMatchSkipReason =
@@ -117,6 +119,9 @@ export function normalizeTeamMatch(
       opponentKills: queriedIsRadiant ? match.dire_score : match.radiant_score,
       leagueId: validId(match.leagueid) ? match.leagueid : null,
       leagueName: name(match.league_name),
+      teamWon: match.radiant_win === undefined || match.radiant_win === null
+        ? null
+        : queriedIsRadiant ? match.radiant_win : !match.radiant_win,
     },
   };
 }

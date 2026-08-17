@@ -44,7 +44,8 @@
 | --- | --- | --- | --- | --- |
 | DP-020 | История анализов в IndexedDB | API/data + Frontend | review | Успешные handicap/draft/match анализы сохраняются, открываются после reload и отображаются на Dashboard без mock |
 | DP-021 | Экспорт ставок CSV | Frontend | review | CSV скачивается в UTF-8, содержит заголовки и все ставки, значения корректно экранированы |
-| DP-022 | Полные поля ставки и расширенная статистика | Frontend + API/data | todo | Team A/B, market, handicap, bookmaker/comment/analysisId; банк, average odds, drawdown, market/team/freebet breakdown без фиктивных данных |
+| DP-022 | Полные поля ставки и расширенная статистика | Frontend + API/data | in progress | Team A/B, market, handicap, bookmaker/comment/analysisId; банк, average odds, drawdown, market/team/freebet breakdown без фиктивных данных |
+| DP-023 | Удобство анализа форы и вероятность победы | Frontend + API/data | done | Выпуски сортируются и фильтруются по году в названии с честным ограничением OpenDota; команды загружаются из выбранного выпуска; знак форы работает; доступны 10–100 карт; вероятность прохода форы отделена от вероятности победы карты |
 
 ## Текущий цикл
 

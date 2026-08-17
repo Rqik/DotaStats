@@ -50,6 +50,11 @@
     display: block;
   }
 
+  &__margin strong {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
   td small {
     margin-top: 0.15rem;
     color: var(--color-muted);
