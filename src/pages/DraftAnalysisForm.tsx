@@ -1,10 +1,8 @@
 import { RefreshCw } from 'lucide-react';
 import type { CachedResult, HeroOption } from '../api/openDotaRepository';
 import type { DraftFormValue, DraftTeamSide } from '../features/analysis/draftForm';
-import {
-  TournamentTeamSelection,
-  type TournamentSelection,
-} from '../features/team-picker/TournamentTeamSelection';
+import { TournamentTeamSelection } from '../features/team-picker/TournamentTeamSelection';
+import type { TournamentPickerState } from '../features/team-picker/tournamentPickerState';
 import { HeroPicker } from './HeroPicker';
 import './DraftAnalysisForm.scss';
 
@@ -13,10 +11,11 @@ interface DraftAnalysisFormProps {
   catalog: CachedResult<HeroOption[]> | null;
   loadingCatalog: boolean;
   catalogError: string;
-  tournamentSelection: TournamentSelection;
+  tournamentPicker: TournamentPickerState;
   onChange: (value: DraftFormValue) => void;
-  onTournamentSelectionChange: (value: TournamentSelection) => void;
+  onTournamentPickerChange: (value: TournamentPickerState) => void;
   onRetryCatalog: () => void;
+  sourceMatchId?: number;
 }
 
 function oppositeSide(side: DraftTeamSide): DraftTeamSide {
@@ -37,10 +36,11 @@ export function DraftAnalysisForm({
   catalog,
   loadingCatalog,
   catalogError,
-  tournamentSelection,
+  tournamentPicker,
   onChange,
-  onTournamentSelectionChange,
+  onTournamentPickerChange,
   onRetryCatalog,
+  sourceMatchId,
 }: DraftAnalysisFormProps) {
   const heroes = catalog?.data ?? [];
   const teamAIds = new Set(value.teamAHeroes.map((hero) => hero.heroId));
@@ -51,7 +51,7 @@ export function DraftAnalysisForm({
   return (
     <div className="draft-form">
       <header className="draft-form__heading">
-        <div><h2>Ручной драфт</h2><p>Выберите по пять разных героев. Названия команд и рыночные линии необязательны.</p></div>
+        <div><h2>{sourceMatchId ? `Драфт матча #${sourceMatchId}` : 'Ручной драфт'}</h2><p>{sourceMatchId ? 'Проверьте загруженные команды и героев. Рыночные линии необязательны.' : 'Выберите по пять разных героев. Названия команд и рыночные линии необязательны.'}</p></div>
         <span className={catalogError ? 'draft-form__source draft-form__source--error' : 'draft-form__source'} role={catalogError ? 'alert' : 'status'}>
           {loadingCatalog ? 'Загружаем реальный каталог героев…' : catalogError || catalogSource(catalog)}
         </span>
@@ -64,7 +64,7 @@ export function DraftAnalysisForm({
       <details className="draft-form__real-teams">
         <summary>Использовать реальные команды и их форму (необязательно)</summary>
         <p>Выберите выпуск турнира и обе команды. Если выбрана только одна команда, анализ не запустится.</p>
-        <TournamentTeamSelection value={tournamentSelection} onChange={onTournamentSelectionChange} />
+        <TournamentTeamSelection value={tournamentPicker} onChange={onTournamentPickerChange} />
       </details>
       <div className="draft-form__teams">
         <section className="draft-form__team draft-form__team--a">

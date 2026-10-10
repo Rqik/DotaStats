@@ -175,6 +175,12 @@ async function run() {
     })()`);
     await delay(200);
     await evaluate(client, `(() => {
+      const select = document.querySelector('.new-analysis__match-id select');
+      if (!select) return;
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(select, 'completed');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    })()`);
+    await evaluate(client, `(() => {
       const input = document.querySelector('input[inputmode="numeric"]');
       if (!input) return false;
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;

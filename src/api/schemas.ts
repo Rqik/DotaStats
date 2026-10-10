@@ -99,6 +99,33 @@ export const openDotaMatchSchema = z.object({
 }).passthrough();
 export type OpenDotaMatch = z.infer<typeof openDotaMatchSchema>;
 
+export const openDotaLiveMatchSchema = z.object({
+  match_id: z.union([
+    z.number().int().nonnegative().safe(),
+    z.string().regex(/^\d+$/).refine((id) => Number.isSafeInteger(Number(id))),
+  ]),
+  league_id: nullableInteger,
+  deactivate_time: nullableInteger,
+  last_update_time: nullableInteger,
+  game_time: nullableInteger,
+  delay: nullableInteger,
+  team_id_radiant: nullableInteger,
+  team_id_dire: nullableInteger,
+  team_name_radiant: nullableString,
+  team_name_dire: nullableString,
+  radiant_score: nullableInteger,
+  dire_score: nullableInteger,
+  players: z.array(z.object({
+    hero_id: nullableInteger,
+    team: z.number().int(),
+    personaname: nullableString,
+    name: nullableString,
+  }).passthrough()),
+}).passthrough();
+
+export type OpenDotaLiveMatch = z.infer<typeof openDotaLiveMatchSchema>;
+export const openDotaLiveMatchesSchema = z.array(openDotaLiveMatchSchema);
+
 export const openDotaLeaguesSchema = z.array(openDotaLeagueSchema);
 export const openDotaTeamsSchema = z.array(openDotaTeamSchema);
 export const openDotaLeagueTeamsSchema = z.array(openDotaTeamSchema);

@@ -52,9 +52,10 @@ export function AccessibleCombobox({ label, placeholder, query, options, selecte
 
   return <label className="team-picker__field">
     <span>{label}</span>
-    <div className="team-picker__combobox">
-      <Search size={16} aria-hidden="true" />
+    <div className={disabled ? 'team-picker__combobox team-picker__combobox--disabled' : 'team-picker__combobox'}>
+      <Search className="team-picker__combobox-icon" size={17} aria-hidden="true" />
       <input
+        className="team-picker__combobox-input"
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={open}
@@ -74,7 +75,7 @@ export function AccessibleCombobox({ label, placeholder, query, options, selecte
         onBlur={() => setOpen(false)}
         onKeyDown={handleKeyDown}
       />
-      <ChevronDown size={16} aria-hidden="true" />
+      <ChevronDown className="team-picker__combobox-icon" size={17} aria-hidden="true" />
       {open && !disabled && visibleOptions.length > 0 ? <div className="team-picker__options" id={listboxId} role="listbox">
         {visibleOptions.map((option, index) => <button
           className={index === safeActiveIndex ? 'team-picker__option team-picker__option--active' : 'team-picker__option'}

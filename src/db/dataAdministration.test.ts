@@ -89,6 +89,19 @@ function populatedDatabase(): MemoryLocalDataDatabase {
 }
 
 describe('local data administration', () => {
+  it('counts and deletes the saved analysis form with application settings', async () => {
+    const storage = new MemoryLocalDataStorage();
+    storage.values.set('dota-pulse-analysis-form:v1', JSON.stringify({ version: 1, form: {} }));
+    storage.values.set('unrelated-app', 'keep');
+    const database = new MemoryLocalDataDatabase();
+    const inspection = await inspectLocalData({ database, storage });
+    expect(inspection.categories.settings.count).toBe(1);
+    expect(inspection.total.count).toBe(1);
+    expect(inspection.localStorage.presentKeys).toContain('dota-pulse-analysis-form:v1');
+    const cleared = await clearAllData({ database, storage });
+    expect(cleared.deletedLocalStorageKeys).toEqual(['dota-pulse-analysis-form:v1']);
+    expect(storage.values.get('unrelated-app')).toBe('keep');
+  });
   it('reports exact table/category counts without exposing the API key or unrelated storage', async () => {
     const database = populatedDatabase();
     const storage = new MemoryLocalDataStorage();

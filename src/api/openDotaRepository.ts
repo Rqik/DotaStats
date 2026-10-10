@@ -12,6 +12,7 @@ import {
   openDotaHeroMatchupsSchema,
   openDotaLeagueTeamsSchema,
   openDotaLeaguesSchema,
+  openDotaLiveMatchesSchema,
   openDotaMatchSchema,
   openDotaTeamMatchesSchema,
   openDotaTeamsSchema,
@@ -19,6 +20,7 @@ import {
   type OpenDotaHeroDuration,
   type OpenDotaHeroMatchup,
   type OpenDotaLeague,
+  type OpenDotaLiveMatch,
   type OpenDotaMatch,
   type OpenDotaTeam,
   type OpenDotaTeamMatch,
@@ -176,6 +178,8 @@ function deduplicate<T>(requests: Map<string, Promise<T>>, key: string, load: ()
 }
 
 export class OpenDotaRepository {
+  private liveResult: CachedResult<OpenDotaLiveMatch[]> | null = null;
+  private readonly liveRequests = new Map<string, Promise<CachedResult<OpenDotaLiveMatch[]>>>();
   private readonly cacheStore: CacheStore;
   private readonly fixedClient?: OpenDotaApiClient;
   private readonly settingsProvider: OpenDotaSettingsProvider;
@@ -267,6 +271,18 @@ export class OpenDotaRepository {
       forceRefresh: options.forceRefresh,
       network: () => this.matchLimiter.run(() => this.client().get(`/matches/${id}`, openDotaMatchSchema)),
     }));
+  }
+
+  async listLiveMatches(options: RefreshOptions = {}): Promise<CachedResult<OpenDotaLiveMatch[]>> {
+    if (!options.forceRefresh && this.liveResult && this.now() - this.liveResult.savedAt < 15_000) {
+      return { ...this.liveResult, source: 'cache' };
+    }
+    return deduplicate(this.liveRequests, 'live', async () => {
+      const data = await this.client().get('/live', openDotaLiveMatchesSchema);
+      const result: CachedResult<OpenDotaLiveMatch[]> = { data, source: 'network', savedAt: this.now() };
+      this.liveResult = result;
+      return result;
+    });
   }
 
   async listHeroes(options: RefreshOptions = {}): Promise<CachedResult<HeroOption[]>> {

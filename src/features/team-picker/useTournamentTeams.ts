@@ -12,6 +12,7 @@ import type {
 interface TournamentTeamsState {
   leagues: CachedResult<LeagueOption[]> | null;
   teams: CachedResult<TeamOption[]> | null;
+  teamsLeagueId: number | null;
   loadingLeagues: boolean;
   loadingTeams: boolean;
   error: string;
@@ -27,9 +28,18 @@ interface UseTournamentTeamsResult extends TournamentTeamsState {
 const repository: TeamPickerRepository = openDotaRepository;
 const HOUR_MS = 60 * 60 * 1000;
 
+async function fetchLeagueTeams(leagueId: number, autoRefresh: boolean): Promise<CachedResult<TeamOption[]>> {
+  const teams = await repository.listLeagueTeams(leagueId);
+  if (autoRefresh && teams.source !== 'network' && Date.now() - teams.savedAt >= HOUR_MS) {
+    return repository.listLeagueTeams(leagueId, { forceRefresh: true });
+  }
+  return teams;
+}
+
 const initialState: TournamentTeamsState = {
   leagues: null,
   teams: null,
+  teamsLeagueId: null,
   loadingLeagues: true,
   loadingTeams: false,
   error: '',
@@ -43,14 +53,14 @@ export function describeDataSource<T>(result: CachedResult<T> | null, showAge: b
   return result.source === 'stale-cache' ? `Источник: устаревший кэш${age}.` : `Источник: кэш${age}.`;
 }
 
-export function useTournamentTeams(autoRefresh: boolean): UseTournamentTeamsResult {
-  const [state, setState] = useState<TournamentTeamsState>(initialState);
+export function useTournamentTeams(autoRefresh: boolean, leagueId: number | null): UseTournamentTeamsResult {
+  const [state, setState] = useState<TournamentTeamsState>(() => ({ ...initialState, loadingTeams: leagueId !== null }));
   const teamRequestId = useRef(0);
 
   const retryLeagues = useCallback(async () => {
     setState((current) => ({ ...current, loadingLeagues: true, error: '' }));
     try {
-      const leagues = await repository.listLeagues();
+      const leagues = await repository.listLeagues({ forceRefresh: true });
       setState((current) => ({ ...current, leagues, loadingLeagues: false }));
     } catch {
       setState((current) => ({ ...current, loadingLeagues: false, error: 'Не удалось загрузить список лиг. Повторите попытку.' }));
@@ -73,25 +83,34 @@ export function useTournamentTeams(autoRefresh: boolean): UseTournamentTeamsResu
     };
   }, []);
 
-  const clearTeams = () => {
+  const clearTeams = useCallback(() => {
     teamRequestId.current += 1;
-    setState((current) => ({ ...current, teams: null, loadingTeams: false }));
-  };
+    setState((current) => ({ ...current, teams: null, teamsLeagueId: null, loadingTeams: false }));
+  }, []);
 
-  const loadLeagueTeams = async (leagueId: number) => {
+  const loadLeagueTeams = useCallback(async (leagueId: number) => {
     const requestId = teamRequestId.current + 1;
     teamRequestId.current = requestId;
-    setState((current) => ({ ...current, teams: null, loadingTeams: true, error: '' }));
+    setState((current) => ({ ...current, teams: null, teamsLeagueId: null, loadingTeams: true, error: '' }));
     try {
-      let teams = await repository.listLeagueTeams(leagueId);
-      if (autoRefresh && teams.source !== 'network' && Date.now() - teams.savedAt >= HOUR_MS) {
-        teams = await repository.listLeagueTeams(leagueId, { forceRefresh: true });
-      }
-      if (requestId === teamRequestId.current) setState((current) => ({ ...current, teams, loadingTeams: false }));
+      const teams = await fetchLeagueTeams(leagueId, autoRefresh);
+      if (requestId === teamRequestId.current) setState((current) => ({ ...current, teams, teamsLeagueId: leagueId, loadingTeams: false }));
     } catch {
       if (requestId === teamRequestId.current) setState((current) => ({ ...current, loadingTeams: false, error: 'Не удалось загрузить команды выбранного выпуска.' }));
     }
-  };
+  }, [autoRefresh]);
 
-  return { ...state, clearTeams, loadLeagueTeams, retryLeagues };
+  useEffect(() => {
+    const requestId = ++teamRequestId.current;
+    if (leagueId === null) return;
+    void fetchLeagueTeams(leagueId, autoRefresh).then((teams) => {
+      if (requestId === teamRequestId.current) setState((current) => ({ ...current, teams, teamsLeagueId: leagueId, loadingTeams: false, error: '' }));
+    }).catch(() => {
+      if (requestId === teamRequestId.current) setState((current) => ({ ...current, teams: null, teamsLeagueId: leagueId, loadingTeams: false, error: 'Не удалось загрузить команды выбранного выпуска.' }));
+    });
+    return () => { teamRequestId.current += 1; };
+  }, [leagueId, autoRefresh]);
+
+  const loadingTeams = leagueId !== null && (state.loadingTeams || (state.teamsLeagueId !== leagueId && !state.error));
+  return { ...state, loadingTeams, clearTeams, loadLeagueTeams, retryLeagues };
 }

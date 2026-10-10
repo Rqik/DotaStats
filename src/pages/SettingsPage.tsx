@@ -7,6 +7,7 @@ import { useDataTransfer } from '../features/data-transfer/useDataTransfer';
 import { checkOpenDotaStatus, clearOpenDotaCache } from '../features/settings/openDotaActions';
 import { useSettingsStore } from '../features/settings/settingsStore';
 import { useAnalysisStore } from '../stores/analysis';
+import { useAnalysisFormStore } from '../features/analysis/analysisFormStore';
 import { DataDeletionPanel } from './DataDeletionPanel';
 import './SettingsPage.scss';
 
@@ -63,6 +64,7 @@ export default function SettingsPage() {
   const resetAfterDeletion = () => {
     useBetStore.setState({ bets: [], hydrated: true, loading: false, error: null });
     useAnalysisStore.getState().resetAll();
+    useAnalysisFormStore.getState().resetForm();
     useSettingsStore.setState({ apiKey: '', autoRefresh: true, showCacheAge: true });
     void useSettingsStore.persist.clearStorage();
     navigate('/settings', { replace: true });

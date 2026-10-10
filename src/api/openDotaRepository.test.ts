@@ -27,6 +27,35 @@ const team = {
 };
 
 describe('OpenDotaRepository', () => {
+  it('deduplicates live loads, uses only a short memory cache and forces refresh', async () => {
+    let now = 1_000;
+    let version = 1;
+    const { client, calls } = stubClient(() => [{ match_id: '9037322346', game_time: version++, players: [] }]);
+    const cacheStore = new MemoryCacheStore();
+    const repository = createOpenDotaRepository({ client, cacheStore, now: () => now });
+    const results = await Promise.all([repository.listLiveMatches(), repository.listLiveMatches()]);
+    expect(results[0].data).toEqual(results[1].data);
+    expect(calls).toEqual(['/live']);
+    await expect(repository.listLiveMatches()).resolves.toMatchObject({ source: 'cache', data: [{ game_time: 1 }] });
+    await expect(repository.listLiveMatches({ forceRefresh: true })).resolves.toMatchObject({ source: 'network', data: [{ game_time: 2 }] });
+    now += 15_001;
+    await expect(repository.listLiveMatches()).resolves.toMatchObject({ source: 'network', data: [{ game_time: 3 }] });
+    expect(calls).toHaveLength(3);
+    await expect(cacheStore.get('cachedMatches', 'match:9037322346')).resolves.toBeUndefined();
+  });
+
+  it('never presents a previous live snapshot as current when refresh fails', async () => {
+    let isOffline = false;
+    const { client } = stubClient(() => {
+      if (isOffline) throw new ApiError('network', 'offline');
+      return [{ match_id: '9037322346', players: [] }];
+    });
+    const repository = createOpenDotaRepository({ client, cacheStore: new MemoryCacheStore() });
+    await repository.listLiveMatches();
+    isOffline = true;
+    await expect(repository.listLiveMatches({ forceRefresh: true })).rejects.toMatchObject({ kind: 'network' });
+  });
+
   it('normalizes leagues and the real array shape of league teams', async () => {
     const { client, calls } = stubClient((path) => {
       if (path === '/leagues') return [{ leagueid: 16935, name: 'The International 2024', tier: 'premium' }];

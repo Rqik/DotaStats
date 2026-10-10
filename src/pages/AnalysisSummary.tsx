@@ -13,6 +13,7 @@ interface AnalysisSummaryProps {
   sample: string;
   selectedHeroCount: number;
   matchId: string;
+  matchSource: 'live' | 'completed';
   canSubmit: boolean;
   isLoading: boolean;
 }
@@ -40,6 +41,7 @@ export function AnalysisSummary({
   sample,
   selectedHeroCount,
   matchId,
+  matchSource,
   canSubmit,
   isLoading,
 }: AnalysisSummaryProps) {
@@ -65,7 +67,7 @@ export function AnalysisSummary({
       ) : null}
       {mode === 'match' ? (
         <>
-          <strong>Разбор матча</strong>
+          <strong>{matchSource === 'live' ? 'Текущий матч и драфт' : 'Разбор завершённого матча'}</strong>
           <b>#{matchId || '—'}</b>
         </>
       ) : null}
@@ -75,7 +77,7 @@ export function AnalysisSummary({
         disabled={!canSubmit || isLoading}
       >
         {isLoading ? <LoaderCircle className="new-analysis__spinner" size={17} /> : <Zap size={17} />}
-        {isLoading ? 'Загружаем данные…' : 'Запустить анализ'}
+        {isLoading ? 'Загружаем данные…' : mode === 'match' ? (matchSource === 'live' ? 'Загрузить текущий матч' : 'Загрузить матч') : 'Запустить анализ'}
       </button>
       <small>{submitHint(mode, canSubmit)}</small>
     </aside>

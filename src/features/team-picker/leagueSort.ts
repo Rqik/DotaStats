@@ -7,6 +7,12 @@ const tierLabels: Readonly<Record<string, string>> = {
   professional: 'Профессиональный',
 };
 
+const searchAliases = new Map([
+  ['бласт', 'blast'],
+  ['слэм', 'slam'],
+  ['слем', 'slam'],
+]);
+
 export function extractLeagueYear(name: string): number | null {
   const match = name.match(/\b(19\d{2}|20\d{2})\b/);
   return match ? Number(match[1]) : null;
@@ -22,9 +28,10 @@ export function sortAndFilterLeagues(
   year: number | null,
   tier: string | null = null,
 ): LeagueOption[] {
-  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const searchTerms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean)
+    .map((term) => searchAliases.get(term) ?? term);
   return leagues
-    .filter((league) => !normalizedQuery || league.name.toLocaleLowerCase().includes(normalizedQuery))
+    .filter((league) => searchTerms.every((term) => league.name.toLocaleLowerCase().includes(term)))
     .filter((league) => year === null || extractLeagueYear(league.name) === year)
     .filter((league) => tier === null || league.tier === tier)
     .sort((left, right) => {

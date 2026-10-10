@@ -1,0 +1,29 @@
+.match-player {
+  display: grid;
+  min-width: 0;
+  height: 100%;
+  align-content: start;
+  gap: 0.4rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  background: var(--color-background);
+  padding: 0.4rem;
+
+  &__name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__name--missing,
+  &__pick,
+  &__kda small { color: var(--color-muted); }
+
+  &__name--missing { font-size: 0.7rem; font-weight: 400; }
+  &__kda { display: grid; gap: 0.15rem; }
+  &__kda small,
+  &__pick { font-size: 0.65rem; }
+  &__kda b { font-size: 0.75rem; font-weight: 500; }
+}

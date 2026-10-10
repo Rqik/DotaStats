@@ -1,4 +1,5 @@
 import { OPEN_DOTA_SETTINGS_STORAGE_KEY } from '../api/settingsProvider';
+import { ANALYSIS_FORM_STORAGE_KEY } from '../features/analysis/analysisFormState';
 import { db, type DotaPulseDatabase } from '../db';
 import { cacheBuckets } from './cacheRepository';
 
@@ -12,6 +13,7 @@ export type LocalDataTable = (typeof localDataTables)[number];
 
 export const ownedLocalStorageKeys = [
   OPEN_DOTA_SETTINGS_STORAGE_KEY,
+  ANALYSIS_FORM_STORAGE_KEY,
   'dota-pulse-bets:v1',
   'dota-pulse-bets:v2',
 ] as const;
@@ -168,9 +170,10 @@ export async function inspectLocalData(options: DataAdministrationOptions = {}):
   const tables = await database.inspectTables(localDataTables);
   const local = inspectStorage(storage);
   const cache = sumCategories(cacheBuckets.map((table) => tables[table]));
+  const settingsKeys = [OPEN_DOTA_SETTINGS_STORAGE_KEY, ANALYSIS_FORM_STORAGE_KEY];
   const settings: DataCategoryInspection = {
-    count: local.presentKeys.includes(OPEN_DOTA_SETTINGS_STORAGE_KEY) ? 1 : 0,
-    estimatedBytes: local.bytesByKey.get(OPEN_DOTA_SETTINGS_STORAGE_KEY) ?? 0,
+    count: settingsKeys.filter((key) => local.presentKeys.includes(key)).length,
+    estimatedBytes: settingsKeys.reduce((total, key) => total + (local.bytesByKey.get(key) ?? 0), 0),
   };
   const legacyBetKeys = ['dota-pulse-bets:v1', 'dota-pulse-bets:v2'];
   const legacyBets: DataCategoryInspection = {

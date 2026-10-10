@@ -24,7 +24,7 @@ const modes = [
   {
     id: 'match' as const,
     title: 'По Match ID',
-    description: 'Загрузить факты и графики завершённого матча',
+    description: 'Текущий матч и драфт или разбор завершённой игры',
     icon: Gamepad2,
     available: true,
   },
@@ -48,7 +48,7 @@ export function AnalysisModes({ mode, onChange }: AnalysisModesProps) {
             <strong>{title}</strong>
             <small>{description}</small>
           </span>
-          {mode === id ? <Check size={17} /> : null}
+          <Check className="new-analysis__mode-check" size={17} aria-hidden="true" />
         </button>
       ))}
     </div>

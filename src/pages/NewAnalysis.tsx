@@ -1,8 +1,15 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeading } from '../components/PageHeading';
-import type { TournamentSelection } from '../features/team-picker/TournamentTeamSelection';
-import { emptyDraftForm, type DraftFormValue } from '../features/analysis/draftForm';
+import {
+  createTournamentPickerState,
+  type TournamentPickerState,
+} from '../features/team-picker/tournamentPickerState';
+import type { DraftFormValue } from '../features/analysis/draftForm';
+import type { AnalysisFormState } from '../features/analysis/analysisFormState';
+import { useAnalysisFormStore } from '../features/analysis/analysisFormStore';
+import { useLiveMatch } from '../features/analysis/useLiveMatch';
+import { applyLiveDraft } from '../services/liveMatch';
 import { useHeroCatalog } from '../features/analysis/useHeroCatalog';
 import type { DraftAnalysisInput } from '../features/analysis/analysisClient';
 import {
@@ -14,15 +21,10 @@ import { AnalysisModes } from './AnalysisModes';
 import { AnalysisSummary } from './AnalysisSummary';
 import { HandicapAnalysisForm } from './HandicapAnalysisForm';
 import { MatchAnalysisForm } from './MatchAnalysisForm';
+import { LiveMatchPanel } from './LiveMatchPanel';
 import { DraftAnalysisForm } from './DraftAnalysisForm';
 import type { AnalysisMode } from './analysisMode';
 import './NewAnalysis.scss';
-
-const emptyTournamentSelection: TournamentSelection = {
-  league: null,
-  teamA: null,
-  teamB: null,
-};
 
 function validMatchId(value: string): boolean {
   if (!/^\d+$/.test(value)) return false;
@@ -38,23 +40,27 @@ export default function NewAnalysis() {
   const runHandicap = useAnalysisStore((state) => state.runHandicap);
   const loadMatch = useAnalysisStore((state) => state.loadMatch);
   const runDraft = useAnalysisStore((state) => state.runDraft);
-  const [mode, setMode] = useState<AnalysisMode>('handicap');
-  const [tournamentSelection, setTournamentSelection] = useState<TournamentSelection>(
-    emptyTournamentSelection,
-  );
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
-  const [sign, setSign] = useState<HandicapSign>('plus');
-  const [handicap, setHandicap] = useState('20.5');
-  const [odds, setOdds] = useState('1.65');
-  const [sample, setSample] = useState<AnalysisSampleSize>(20);
-  const [draft, setDraft] = useState<DraftFormValue>(emptyDraftForm);
-  const [draftTournamentSelection, setDraftTournamentSelection] = useState<TournamentSelection>(
-    emptyTournamentSelection,
-  );
-  const [matchId, setMatchId] = useState('');
+  const { mode, tournamentPicker, selectedTeamId, sign, handicap, odds, sample, draft, draftTournamentPicker, matchId, matchSource, draftOrigin } = useAnalysisFormStore((state) => state.form);
+  const setField = useAnalysisFormStore((state) => state.setField);
+  const isFormSaved = useAnalysisFormStore((state) => state.isFormSaved);
+  const setMode = (value: AnalysisMode) => setField('mode', value);
+  const setTournamentPicker = (value: TournamentPickerState) => setField('tournamentPicker', value);
+  const setSelectedTeamId = (value: number | null | ((current: number | null) => number | null)) => setField('selectedTeamId', value);
+  const setSign = (value: HandicapSign) => setField('sign', value);
+  const setHandicap = (value: string) => setField('handicap', value);
+  const setOdds = (value: string) => setField('odds', value);
+  const setSample = (value: AnalysisSampleSize) => setField('sample', value);
+  const setDraft = (value: DraftFormValue | ((current: DraftFormValue) => DraftFormValue)) => setField('draft', value);
+  const setDraftTournamentPicker = (value: TournamentPickerState) => setField('draftTournamentPicker', value);
+  const setMatchId = (value: string) => setField('matchId', value);
+  const setMatchSource = (value: 'live' | 'completed') => setField('matchSource', value);
+  const setDraftOrigin = (value: AnalysisFormState['draftOrigin']) => setField('draftOrigin', value);
   const [formError, setFormError] = useState('');
-  const heroCatalog = useHeroCatalog(mode === 'draft');
+  const heroCatalog = useHeroCatalog(mode === 'draft' || (mode === 'match' && matchSource === 'live'));
+  const liveMatch = useLiveMatch(matchId);
 
+  const { selection: tournamentSelection } = tournamentPicker;
+  const { selection: draftTournamentSelection } = draftTournamentPicker;
   const selectedTeam = [tournamentSelection.teamA, tournamentSelection.teamB]
     .find((team) => team?.teamId === selectedTeamId) ?? null;
   const handicapReady = Boolean(
@@ -74,10 +80,12 @@ export default function NewAnalysis() {
     : mode === 'match' ? validMatchId(matchId) : draftReady;
   const isLoading = mode === 'handicap'
     ? handicapState.status === 'loading'
-    : mode === 'match' ? matchState.status === 'loading' : draftState.status === 'loading';
+    : mode === 'match' ? (matchSource === 'live' ? liveMatch.state.status === 'loading' : matchState.status === 'loading') : draftState.status === 'loading';
   const requestError = mode === 'handicap' && handicapState.status === 'error'
     ? handicapState.message
-    : mode === 'match' && matchState.status === 'error' && matchState.input === matchId
+    : mode === 'match' && matchSource === 'live' && liveMatch.state.status === 'error'
+      ? liveMatch.state.message
+    : mode === 'match' && matchSource === 'completed' && matchState.status === 'error' && matchState.input === matchId
       ? matchState.message
       : mode === 'draft' && draftState.status === 'error'
         ? draftState.message
@@ -88,8 +96,9 @@ export default function NewAnalysis() {
     setFormError('');
   };
 
-  const changeTournamentSelection = (nextSelection: TournamentSelection) => {
-    setTournamentSelection(nextSelection);
+  const changeTournamentPicker = (nextPicker: TournamentPickerState) => {
+    setTournamentPicker(nextPicker);
+    const { selection: nextSelection } = nextPicker;
     setSelectedTeamId((current) => {
       const currentIsValid = [nextSelection.teamA?.teamId, nextSelection.teamB?.teamId]
         .includes(current ?? -1);
@@ -143,8 +152,27 @@ export default function NewAnalysis() {
       setFormError('Match ID должен быть положительным целым числом, состоящим только из цифр.');
       return;
     }
+    if (matchSource === 'live') {
+      await liveMatch.load();
+      return;
+    }
     const completed = await loadMatch(matchId);
     if (completed) navigate('/analysis/match/result');
+  };
+
+  const importLiveDraft = () => {
+    if (liveMatch.state.status !== 'success' || liveMatch.state.result.status !== 'found' || !heroCatalog.result) return;
+    const { match } = liveMatch.state.result;
+    try {
+      const nextDraft = applyLiveDraft(match, heroCatalog.result.data, draft);
+      setDraft(nextDraft);
+      setDraftTournamentPicker(createTournamentPickerState());
+      setDraftOrigin({ matchId: match.matchId, fetchedAt: match.fetchedAt, teamAId: match.radiant.teamId, teamBId: match.dire.teamId });
+      setMode('draft');
+      setFormError('');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Не удалось перенести драфт. Обновите матч и каталог героев.');
+    }
   };
 
   const submitDraft = async (): Promise<void> => {
@@ -157,8 +185,11 @@ export default function NewAnalysis() {
       setFormError('Команды должны находиться на разных сторонах Radiant и Dire.');
       return;
     }
-    const hasDraftTeamA = draftTournamentSelection.teamA !== null;
-    const hasDraftTeamB = draftTournamentSelection.teamB !== null;
+    const hasImportedTeams = Boolean(draftOrigin?.teamAId && draftOrigin.teamBId && draftOrigin.teamAId !== draftOrigin.teamBId);
+    const draftTeamAId = draftTournamentSelection.teamA?.teamId ?? (hasImportedTeams ? draftOrigin?.teamAId : null);
+    const draftTeamBId = draftTournamentSelection.teamB?.teamId ?? (hasImportedTeams ? draftOrigin?.teamBId : null);
+    const hasDraftTeamA = Boolean(draftTeamAId);
+    const hasDraftTeamB = Boolean(draftTeamBId);
     if (hasDraftTeamA !== hasDraftTeamB) {
       setFormError('Для учёта формы выберите обе реальные команды либо очистите необязательный выбор.');
       return;
@@ -192,13 +223,13 @@ export default function NewAnalysis() {
         name: draftTournamentSelection.teamA?.name || draft.teamAName.trim() || 'Команда A',
         side: draft.teamASide,
         heroIds: draft.teamAHeroes.map((hero) => hero.heroId),
-        ...(draftTournamentSelection.teamA ? { teamId: draftTournamentSelection.teamA.teamId } : {}),
+        ...(draftTeamAId ? { teamId: draftTeamAId } : {}),
       },
       teamB: {
         name: draftTournamentSelection.teamB?.name || draft.teamBName.trim() || 'Команда B',
         side: draft.teamBSide,
         heroIds: draft.teamBHeroes.map((hero) => hero.heroId),
-        ...(draftTournamentSelection.teamB ? { teamId: draftTournamentSelection.teamB.teamId } : {}),
+        ...(draftTeamBId ? { teamId: draftTeamBId } : {}),
       },
       ...(odds ? { odds } : {}),
       ...(draft.handicapTeam !== 'none' && handicapLine !== undefined
@@ -231,45 +262,69 @@ export default function NewAnalysis() {
         description="Выберите сценарий и укажите исходные данные. Результат покажет источник, формулу и ограничения данных."
       />
       <AnalysisModes mode={mode} onChange={changeMode} />
+      <p className="new-analysis__save-status" role="status">{isFormSaved
+        ? 'Выбор и параметры сохраняются в этом браузере.'
+        : 'Браузер не разрешил сохранение формы. После перезагрузки выбор может сброситься.'}</p>
       <form className="new-analysis__workspace" onSubmit={submit}>
         <section className="new-analysis__form">
-          {mode === 'handicap' ? (
+          <div hidden={mode !== 'handicap'}>
             <HandicapAnalysisForm
-              tournamentSelection={tournamentSelection}
+              tournamentPicker={tournamentPicker}
               selectedTeamId={selectedTeamId}
               sign={sign}
               handicap={handicap}
               odds={odds}
               sample={sample}
-              onTournamentSelectionChange={changeTournamentSelection}
+              onTournamentPickerChange={changeTournamentPicker}
               onSelectedTeamChange={setSelectedTeamId}
               onSignChange={setSign}
               onHandicapChange={setHandicap}
               onOddsChange={setOdds}
               onSampleChange={setSample}
             />
-          ) : null}
+          </div>
           {mode === 'match' ? (
             <MatchAnalysisForm
               matchId={matchId}
+              source={matchSource}
               error={formError && !validMatchId(matchId) ? formError : undefined}
               onMatchIdChange={changeMatchId}
+              onSourceChange={(source) => { setMatchSource(source); setFormError(''); }}
             />
           ) : null}
+          {mode === 'match' && matchSource === 'live' && liveMatch.state.status === 'success' ? (
+            liveMatch.state.result.status === 'found'
+              ? <LiveMatchPanel match={liveMatch.state.result.match} heroes={heroCatalog.result?.data ?? []} loadingHeroes={heroCatalog.loading} catalogError={heroCatalog.error} onRetryCatalog={() => void heroCatalog.retry()} onUseDraft={importLiveDraft} />
+              : <p className="new-analysis__save-status" role="status">Матч #{matchId} не найден среди {liveMatch.state.result.searchedMatches} игр live-списка OpenDota. Это не означает, что он завершён. Повторите загрузку позже или выберите героев вручную в режиме драфта.</p>
+          ) : null}
           {mode === 'draft' ? (
+            <>
+            <p className="new-analysis__save-status">{draftOrigin
+              ? `Драфт матча #${draftOrigin.matchId}, получен ${new Date(draftOrigin.fetchedAt).toLocaleString('ru-RU')}. Модель учитывает составы и доступную историю команд, а текущий счёт и золото в неё не входят.`
+              : 'Герои и команды задаются вручную.'}</p>
             <DraftAnalysisForm
               value={draft}
+              sourceMatchId={draftOrigin?.matchId}
               catalog={heroCatalog.result}
               loadingCatalog={heroCatalog.loading}
               catalogError={heroCatalog.error}
-              tournamentSelection={draftTournamentSelection}
+              tournamentPicker={draftTournamentPicker}
               onChange={(value) => {
+                const isCompositionChanged = value.teamAHeroes !== draft.teamAHeroes || value.teamBHeroes !== draft.teamBHeroes
+                  || value.teamAName !== draft.teamAName || value.teamBName !== draft.teamBName
+                  || value.teamASide !== draft.teamASide || value.teamBSide !== draft.teamBSide;
                 setDraft(value);
+                if (isCompositionChanged) setDraftOrigin(null);
                 setFormError('');
               }}
               onRetryCatalog={() => void heroCatalog.retry()}
-              onTournamentSelectionChange={(selection) => {
-                setDraftTournamentSelection(selection);
+              onTournamentPickerChange={(picker) => {
+                setDraftTournamentPicker(picker);
+                const isSelectionChanged = picker.selection.league?.leagueId !== draftTournamentSelection.league?.leagueId
+                  || picker.selection.teamA?.teamId !== draftTournamentSelection.teamA?.teamId
+                  || picker.selection.teamB?.teamId !== draftTournamentSelection.teamB?.teamId;
+                if (isSelectionChanged) setDraftOrigin(null);
+                const { selection } = picker;
                 setDraft((current) => ({
                   ...current,
                   teamAName: selection.teamA?.name ?? current.teamAName,
@@ -278,6 +333,7 @@ export default function NewAnalysis() {
                 setFormError('');
               }}
             />
+            </>
           ) : null}
           {formError && (mode !== 'match' || validMatchId(matchId)) ? (
             <p className="new-analysis__error" role="alert">{formError}</p>
@@ -297,6 +353,7 @@ export default function NewAnalysis() {
           sample={String(sample)}
           selectedHeroCount={draftHeroIds.length}
           matchId={matchId}
+          matchSource={matchSource}
           canSubmit={canSubmit}
           isLoading={isLoading}
         />

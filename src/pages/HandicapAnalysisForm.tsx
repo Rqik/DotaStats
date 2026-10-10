@@ -1,17 +1,15 @@
-import {
-  TournamentTeamSelection,
-  type TournamentSelection,
-} from '../features/team-picker/TournamentTeamSelection';
+import { TournamentTeamSelection } from '../features/team-picker/TournamentTeamSelection';
+import type { TournamentPickerState } from '../features/team-picker/tournamentPickerState';
 import type { AnalysisSampleSize, HandicapSign } from '../stores/analysis';
 
 interface HandicapAnalysisFormProps {
-  tournamentSelection: TournamentSelection;
+  tournamentPicker: TournamentPickerState;
   selectedTeamId: number | null;
   sign: HandicapSign;
   handicap: string;
   odds: string;
   sample: AnalysisSampleSize;
-  onTournamentSelectionChange: (value: TournamentSelection) => void;
+  onTournamentPickerChange: (value: TournamentPickerState) => void;
   onSelectedTeamChange: (teamId: number) => void;
   onSignChange: (sign: HandicapSign) => void;
   onHandicapChange: (value: string) => void;
@@ -21,7 +19,108 @@ interface HandicapAnalysisFormProps {
 
 const sampleSizes: readonly AnalysisSampleSize[] = [10, 20, 30, 50, 100];
 
-export function HandicapAnalysisForm({ tournamentSelection, selectedTeamId, sign, handicap, odds, sample, onTournamentSelectionChange, onSelectedTeamChange, onSignChange, onHandicapChange, onOddsChange, onSampleChange }: HandicapAnalysisFormProps) {
-  const availableTeams = [tournamentSelection.teamA, tournamentSelection.teamB].filter((team) => team !== null);
-  return <><h2>Участники и линия</h2><TournamentTeamSelection value={tournamentSelection} onChange={onTournamentSelectionChange} /><div className="new-analysis__fields"><label>Выбранная команда<select value={selectedTeamId ?? ''} onChange={(event) => onSelectedTeamChange(Number(event.target.value))} disabled={availableTeams.length !== 2}><option value="">Выберите команду</option>{availableTeams.map((team) => <option value={team.teamId} key={team.teamId}>{team.name}</option>)}</select></label><fieldset className="new-analysis__sign-control"><legend>Фора по убийствам</legend><div role="group" aria-label="Знак форы"><button aria-label="Положительная фора" className={sign === 'plus' ? 'new-analysis__sign new-analysis__sign--active' : 'new-analysis__sign'} type="button" onClick={() => onSignChange('plus')} aria-pressed={sign === 'plus'}>+</button><button aria-label="Отрицательная фора" className={sign === 'minus' ? 'new-analysis__sign new-analysis__sign--active' : 'new-analysis__sign'} type="button" onClick={() => onSignChange('minus')} aria-pressed={sign === 'minus'}>−</button></div><input aria-label="Значение форы" inputMode="decimal" value={handicap} onChange={(event) => onHandicapChange(event.target.value)} /><span className="new-analysis__sign-value" aria-live="polite">Линия: {sign === 'plus' ? '+' : '−'}{handicap || '0'}</span></fieldset><label>Коэффициент<input inputMode="decimal" value={odds} onChange={(event) => onOddsChange(event.target.value)} /></label></div><div className="new-analysis__sample" aria-label="Размер выборки"><span className="new-analysis__sample-note">Последние доступные карты; смена состава автоматически не определяется; OpenDota может вернуть меньше.</span>{sampleSizes.map((size) => <button className={sample === size ? 'new-analysis__sample-option new-analysis__sample-option--active' : 'new-analysis__sample-option'} type="button" key={size} onClick={() => onSampleChange(size)} aria-pressed={sample === size}>{size} карт</button>)}</div></>;
+export function HandicapAnalysisForm({
+  tournamentPicker,
+  selectedTeamId,
+  sign,
+  handicap,
+  odds,
+  sample,
+  onTournamentPickerChange,
+  onSelectedTeamChange,
+  onSignChange,
+  onHandicapChange,
+  onOddsChange,
+  onSampleChange,
+}: HandicapAnalysisFormProps) {
+  const { selection } = tournamentPicker;
+  const availableTeams = [selection.teamA, selection.teamB]
+    .filter((team) => team !== null);
+
+  return (
+    <>
+      <h2>Участники и линия</h2>
+      <TournamentTeamSelection
+        value={tournamentPicker}
+        onChange={onTournamentPickerChange}
+      />
+      <div className="new-analysis__fields">
+        <label>
+          Выбранная команда
+          <select
+            className="new-analysis__control"
+            value={selectedTeamId ?? ''}
+            onChange={(event) => onSelectedTeamChange(Number(event.target.value))}
+            disabled={availableTeams.length !== 2}
+          >
+            <option value="">Выберите команду</option>
+            {availableTeams.map((team) => (
+              <option value={team.teamId} key={team.teamId}>{team.name}</option>
+            ))}
+          </select>
+        </label>
+        <fieldset className="new-analysis__sign-control">
+          <legend>Фора по убийствам</legend>
+          <div className="new-analysis__sign-row">
+            <div className="new-analysis__sign-buttons" role="group" aria-label="Знак форы">
+              <button
+                aria-label="Положительная фора"
+                className={sign === 'plus' ? 'new-analysis__sign new-analysis__sign--active' : 'new-analysis__sign'}
+                type="button"
+                onClick={() => onSignChange('plus')}
+                aria-pressed={sign === 'plus'}
+              >
+                +
+              </button>
+              <button
+                aria-label="Отрицательная фора"
+                className={sign === 'minus' ? 'new-analysis__sign new-analysis__sign--active' : 'new-analysis__sign'}
+                type="button"
+                onClick={() => onSignChange('minus')}
+                aria-pressed={sign === 'minus'}
+              >
+                −
+              </button>
+            </div>
+            <input
+              className="new-analysis__control"
+              aria-label="Значение форы"
+              inputMode="decimal"
+              value={handicap}
+              onChange={(event) => onHandicapChange(event.target.value)}
+            />
+          </div>
+          <span className="new-analysis__sign-value" aria-live="polite">
+            Линия: {sign === 'plus' ? '+' : '−'}{handicap || '0'}
+          </span>
+        </fieldset>
+        <label>
+          Коэффициент
+          <input
+            className="new-analysis__control"
+            inputMode="decimal"
+            value={odds}
+            onChange={(event) => onOddsChange(event.target.value)}
+          />
+        </label>
+      </div>
+      <div className="new-analysis__sample" aria-label="Размер выборки">
+        <span className="new-analysis__sample-note">
+          Последние доступные карты; смена состава автоматически не определяется;
+          OpenDota может вернуть меньше.
+        </span>
+        {sampleSizes.map((size) => (
+          <button
+            className={sample === size ? 'new-analysis__sample-option new-analysis__sample-option--active' : 'new-analysis__sample-option'}
+            type="button"
+            key={size}
+            onClick={() => onSampleChange(size)}
+            aria-pressed={sample === size}
+          >
+            {size} карт
+          </button>
+        ))}
+      </div>
+    </>
+  );
 }

@@ -1,8 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { ArrowLeft, Download, Info } from 'lucide-react';
+import { ArrowLeft, Download, Info, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeading } from '../components/PageHeading';
 import { AnalysisPersistenceNotice } from '../components/AnalysisPersistenceNotice';
+import { HeroIdentity } from '../components/HeroIdentity';
+import { useHeroCatalog } from '../features/analysis/useHeroCatalog';
 import { downloadJsonFile } from '../features/data-transfer/dataTransfer';
 import { useAnalysisStore } from '../stores/analysis';
 import { MatchTeamPanel } from './MatchTeamPanel';
@@ -30,6 +32,8 @@ export default function MatchAnalysisResult() {
   const analysis = useAnalysisStore((state) => state.match);
   const persistence = useAnalysisStore((state) => state.persistence.match);
   const retryPersistence = useAnalysisStore((state) => state.retryPersistence);
+  const catalog = useHeroCatalog(analysis.status === 'success');
+  const heroes = new Map((catalog.result?.data ?? []).map((hero) => [hero.heroId, hero]));
 
   if (analysis.status === 'idle') {
     return (
@@ -101,21 +105,28 @@ export default function MatchAnalysisResult() {
       <AnalysisPersistenceNotice state={persistence} onRetry={() => void retryPersistence('match')} />
       <section className="match-analysis-result__summary" aria-label="Итог матча">
         <div><span>Счёт</span><strong>{match.radiant.score ?? '—'} : {match.dire.score ?? '—'}</strong></div>
-        <div><span>Победитель</span><strong>{match.winnerTeamName ?? 'Не указан'}</strong></div>
+        <div><span>Победитель</span><strong className="match-analysis-result__winner">
+          {match.winnerSide !== null ? <Trophy size={20} aria-hidden="true" /> : null}
+          {match.winnerTeamName ?? 'Не указан'}
+        </strong></div>
         <div><span>Длительность</span><strong>{match.durationMinutes === null ? 'Не указана' : `${match.durationMinutes.toFixed(1)} мин.`}</strong></div>
         <div><span>Парсинг</span><strong>{match.parsed ? 'Разобран OpenDota' : 'Не разобран'}</strong></div>
       </section>
+      {catalog.loading ? <p className="match-analysis-result__catalog" role="status">Загружаем каталог героев…</p> : null}
+      {catalog.error ? <p className="match-analysis-result__catalog" role="alert">
+        {catalog.error} <button type="button" onClick={() => void catalog.retry()}>Повторить загрузку героев</button>
+      </p> : null}
       <section className="match-analysis-result__teams" aria-label="Команды и составы">
-        <MatchTeamPanel team={match.radiant} />
-        <MatchTeamPanel team={match.dire} />
+        <MatchTeamPanel team={match.radiant} heroes={heroes} />
+        <MatchTeamPanel team={match.dire} heroes={heroes} />
       </section>
       <section className="match-analysis-result__draft">
         <h2>Баны героев</h2>
         {match.bans.length > 0 ? (
           <ul>{match.bans.map((ban) => (
             <li key={`${ban.heroId}-${ban.order}`}>
-              Hero #{ban.heroId}
-              <small>{ban.side ?? 'сторона не указана'} · порядок {ban.order}</small>
+              <HeroIdentity hero={heroes.get(ban.heroId)} heroId={ban.heroId} isBanned />
+              <small>{ban.side === 'radiant' ? 'Radiant' : ban.side === 'dire' ? 'Dire' : 'Сторона не указана'} · порядок {ban.order + 1}</small>
             </li>
           ))}</ul>
         ) : <p>Баны отсутствуют в ответе OpenDota.</p>}

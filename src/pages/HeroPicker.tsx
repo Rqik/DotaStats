@@ -1,6 +1,7 @@
 import { Search, X } from 'lucide-react';
 import { useId, useState } from 'react';
 import type { HeroOption } from '../api/openDotaRepository';
+import { HeroIdentity } from '../components/HeroIdentity';
 import './HeroPicker.scss';
 
 interface HeroPickerProps {
@@ -51,7 +52,7 @@ export function HeroPicker({
       <div className="hero-picker__selected" aria-label={`Выбранные герои: ${label}`}>
         {selected.length > 0 ? selected.map((hero) => (
           <span className="hero-picker__chip" key={hero.heroId}>
-            {hero.name}
+            <HeroIdentity hero={hero} variant="compact" />
             <button
               type="button"
               disabled={disabled}
@@ -81,7 +82,7 @@ export function HeroPicker({
         <div className="hero-picker__results" id={resultsId} aria-live="polite">
           {results.length > 0 ? results.map((hero) => (
             <button type="button" key={hero.heroId} onClick={() => addHero(hero)}>
-              <strong>{hero.name}</strong>
+              <HeroIdentity hero={hero} variant="compact" />
               <small>{hero.roles.join(', ') || 'Роль не указана'}</small>
             </button>
           )) : <p>Подходящих доступных героев не найдено.</p>}

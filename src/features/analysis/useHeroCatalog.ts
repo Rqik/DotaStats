@@ -29,7 +29,7 @@ export function useHeroCatalog(enabled: boolean): UseHeroCatalogResult {
     const currentRequest = requestId.current + 1;
     requestId.current = currentRequest;
     try {
-      const result = await openDotaRepository.listHeroes();
+      const result = await openDotaRepository.listHeroes({ forceRefresh: true });
       if (requestId.current === currentRequest) setState({ result, loading: false, error: '' });
     } catch {
       if (requestId.current === currentRequest) {
